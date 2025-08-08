@@ -21,6 +21,7 @@ app.use(cors({
 app.use(express.json());
 
 // Session (for auth). On localhost we use non-secure cookies.
+const isHttps = (process.env.PUBLIC_BASE_URL || '').startsWith('https://');
 app.use(
   session({
     secret: process.env.SESSION_SECRET || 'dev-insecure-secret',
@@ -28,8 +29,8 @@ app.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      sameSite: 'lax',
-      secure: false,
+      sameSite: isHttps ? 'none' : 'lax',
+      secure: isHttps,
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     },
   })
@@ -170,6 +171,13 @@ function requireAuth(req, res, next) {
 app.get('/exercises/:id/solution', requireAuth, (req, res) => {
   const doc = findExerciseById(req.params.id);
   if (!doc) return res.status(404).json({ error: 'not_found' });
+  const visibility = doc.visibility || 'after-pass';
+  if (visibility === 'never') return res.status(403).json({ error: 'forbidden' });
+  if (visibility === 'after-pass') {
+    const db = readProgress();
+    const rec = db[`u:${req.session.user.id}`] || { solved: {} };
+    if (!rec.solved[doc.id]) return res.status(403).json({ error: 'locked_until_pass' });
+  }
   const files = doc.solution?.files || [];
   res.json({ id: doc.id, files });
 });
@@ -223,12 +231,32 @@ app.get('/submissions/:sid/stream', (req, res) => {
 
   const { child } = entry;
 
-  const onStdout = (d) => send('log', { stream: 'stdout', chunk: d.toString() });
-  const onStderr = (d) => send('log', { stream: 'stderr', chunk: d.toString() });
+  let totalBytes = 0;
+  const MAX_BYTES = 200 * 1024; // 200KB per run
+  const onChunk = (stream, buf) => {
+    if (!buf) return;
+    const s = buf.toString();
+    totalBytes += Buffer.byteLength(s);
+    if (totalBytes <= MAX_BYTES) send('log', { stream, chunk: s });
+    else if (totalBytes - Buffer.byteLength(s) < MAX_BYTES) send('log', { stream, chunk: '\n[truncated]\n' });
+  };
+  const onStdout = (d) => onChunk('stdout', d);
+  const onStderr = (d) => onChunk('stderr', d);
   child.stdout.on('data', onStdout);
   child.stderr.on('data', onStderr);
 
+  // Timeout/kill runaway runs
+  const KILL_AFTER_MS = 60 * 1000;
+  const killer = setTimeout(() => {
+    try { child.kill('SIGKILL'); } catch {}
+  }, KILL_AFTER_MS);
+
+  // SSE keepalive
+  const keep = setInterval(() => { res.write(':keepalive\n\n'); }, 15000);
+
   child.on('close', (code) => {
+    clearTimeout(killer);
+    clearInterval(keep);
     const entry2 = submissions.get(req.params.sid);
     if (entry2?.exerciseId && code === 0) {
       const db = readProgress();
@@ -270,6 +298,21 @@ app.get('/me/progress', (req, res) => {
   const db = readProgress();
   const rec = db[`u:${req.session.user.id}`] || { solved: {} };
   res.json(rec);
+});
+
+// Merge device progress into user
+app.post('/me/progress/migrate', (req, res) => {
+  if (!req.session.user) return res.status(401).json({ error: 'unauthorized' });
+  const deviceId = req.body?.deviceId;
+  if (!deviceId) return res.status(400).json({ error: 'missing_deviceId' });
+  const db = readProgress();
+  const uKey = `u:${req.session.user.id}`;
+  const dKey = `d:${deviceId}`;
+  const u = db[uKey] || { solved: {} };
+  const d = db[dKey] || { solved: {} };
+  db[uKey] = { solved: { ...d.solved, ...u.solved } };
+  writeProgress(db);
+  return res.json({ ok: true, merged: Object.keys(d.solved || {}).length });
 });
 
 const PORT = process.env.PORT || 3001;
