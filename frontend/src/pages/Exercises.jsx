@@ -5,6 +5,7 @@ export default function Exercises() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [progress, setProgress] = useState({})
+  const [user, setUser] = useState(null)
 
   useEffect(() => {
     fetch('/api/exercises')
@@ -15,21 +16,38 @@ export default function Exercises() {
   }, [])
 
   useEffect(() => {
-    const key = 'sb:device'
-    let deviceId = localStorage.getItem(key)
-    if (!deviceId) {
-      deviceId = 'dev_' + Math.random().toString(36).slice(2, 10)
-      localStorage.setItem(key, deviceId)
-    }
-    // Load server progress
-    fetch(`/api/progress?deviceId=${encodeURIComponent(deviceId)}`)
-      .then(r => r.json())
-      .then(d => setProgress(d.solved || {}))
-      .catch(() => {
+    // determine login status
+    fetch('/api/auth/me').then(r=>r.json()).then(d=>setUser(d.user||null)).catch(()=>setUser(null))
+  }, [])
+
+  useEffect(() => {
+    // Load progress based on login status
+    const load = async () => {
+      try {
+        if (user) {
+          const r = await fetch('/api/me/progress')
+          const d = await r.json()
+          setProgress(d.solved || {})
+          return
+        }
+      } catch {}
+      const key = 'sb:device'
+      let deviceId = localStorage.getItem(key)
+      if (!deviceId) {
+        deviceId = 'dev_' + Math.random().toString(36).slice(2, 10)
+        localStorage.setItem(key, deviceId)
+      }
+      try {
+        const r2 = await fetch(`/api/progress?deviceId=${encodeURIComponent(deviceId)}`)
+        const d2 = await r2.json()
+        setProgress(d2.solved || {})
+      } catch {
         const pg = JSON.parse(localStorage.getItem('sb:progress') || '{}')
         setProgress(pg[deviceId]?.solved || {})
-      })
-  }, [])
+      }
+    }
+    load()
+  }, [user])
 
   if (loading) return <div className="panel">Loading…</div>
   if (error) return <div className="panel" style={{ color: 'var(--danger)' }}>{error}</div>

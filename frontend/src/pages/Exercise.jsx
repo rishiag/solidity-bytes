@@ -57,15 +57,18 @@ export default function Exercise({ id }) {
           const s = parseMochaSummary(log)
           setSummary(s)
         } catch {}
-        // cache progress client-side for now, server sync is already persisted
+        // cache progress for anonymous users only (server persists for logged-in)
         try {
-          const key = 'sb:device'
-          const dev = localStorage.getItem(key) || deviceId
-          const pgKey = 'sb:progress'
-          const db = JSON.parse(localStorage.getItem(pgKey) || '{}')
-          db[dev] = db[dev] || { solved: {} }
-          if (d.code === 0) db[dev].solved[id] = true
-          localStorage.setItem(pgKey, JSON.stringify(db))
+          const me = await fetch('/api/auth/me').then(r=>r.json()).catch(()=>({}))
+          if (!me.user) {
+            const key = 'sb:device'
+            const dev = localStorage.getItem(key) || deviceId
+            const pgKey = 'sb:progress'
+            const db = JSON.parse(localStorage.getItem(pgKey) || '{}')
+            db[dev] = db[dev] || { solved: {} }
+            if (d.code === 0) db[dev].solved[id] = true
+            localStorage.setItem(pgKey, JSON.stringify(db))
+          }
         } catch {}
       })
     } catch (e) {

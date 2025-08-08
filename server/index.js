@@ -38,7 +38,7 @@ app.use(
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const submissions = new Map(); // sid -> { child, startedAt, exerciseId, deviceId }
+const submissions = new Map(); // sid -> { child, startedAt, exerciseId, deviceId, userId }
 const dataDir = path.join(process.cwd(), '.data');
 const progressFile = path.join(dataDir, 'progress.json');
 function readProgress() {
@@ -162,7 +162,12 @@ app.get('/exercises/:id', (req, res) => {
 });
 
 // Return full solution files for an exercise (MVP: ungated)
-app.get('/exercises/:id/solution', (req, res) => {
+function requireAuth(req, res, next) {
+  if (!req.session.user) return res.status(401).json({ error: 'unauthorized' });
+  next();
+}
+
+app.get('/exercises/:id/solution', requireAuth, (req, res) => {
   const doc = findExerciseById(req.params.id);
   if (!doc) return res.status(404).json({ error: 'not_found' });
   const files = doc.solution?.files || [];
@@ -192,7 +197,8 @@ app.post('/submissions', (req, res) => {
     },
   });
 
-  submissions.set(sid, { child, startedAt: Date.now(), exerciseId: id, deviceId: deviceId || null });
+  const userId = req.session.user?.id || null;
+  submissions.set(sid, { child, startedAt: Date.now(), exerciseId: id, deviceId: deviceId || null, userId });
 
   child.on('close', () => {
     setTimeout(() => submissions.delete(sid), 5 * 60 * 1000);
@@ -224,11 +230,19 @@ app.get('/submissions/:sid/stream', (req, res) => {
 
   child.on('close', (code) => {
     const entry2 = submissions.get(req.params.sid);
-    if (entry2?.deviceId && entry2?.exerciseId && code === 0) {
+    if (entry2?.exerciseId && code === 0) {
       const db = readProgress();
-      const dev = db[entry2.deviceId] || { solved: {} };
-      dev.solved[entry2.exerciseId] = true;
-      db[entry2.deviceId] = dev;
+      if (entry2.userId) {
+        const key = `u:${entry2.userId}`;
+        const rec = db[key] || { solved: {} };
+        rec.solved[entry2.exerciseId] = true;
+        db[key] = rec;
+      } else if (entry2.deviceId) {
+        const key = `d:${entry2.deviceId}`;
+        const rec = db[key] || { solved: {} };
+        rec.solved[entry2.exerciseId] = true;
+        db[key] = rec;
+      }
       writeProgress(db);
     }
     send('done', { code });
@@ -241,12 +255,21 @@ app.get('/submissions/:sid/stream', (req, res) => {
   });
 });
 
-// Simple progress fetch by deviceId
+// Progress by deviceId (legacy for anonymous users)
 app.get('/progress', (req, res) => {
   const deviceId = req.query.deviceId;
   const db = readProgress();
-  if (!deviceId || !db[deviceId]) return res.json({ solved: {} });
-  res.json(db[deviceId]);
+  if (!deviceId) return res.json({ solved: {} });
+  const rec = db[`d:${deviceId}`] || { solved: {} };
+  res.json(rec);
+});
+
+// Progress for logged-in user
+app.get('/me/progress', (req, res) => {
+  if (!req.session.user) return res.status(401).json({ error: 'unauthorized' });
+  const db = readProgress();
+  const rec = db[`u:${req.session.user.id}`] || { solved: {} };
+  res.json(rec);
 });
 
 const PORT = process.env.PORT || 3001;
