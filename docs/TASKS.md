@@ -4,8 +4,8 @@ Use this checklist to execute the MVP plan. Keep it updated as tasks complete.
 
 ### Phase 0 — Product definition and content spec
 - [ ] Draft track map and learning outcomes (Tracks 0–4)
-- [ ] Define `exercise.schema.json`
-- [ ] Write author style guide
+- [x] Define `exercise.schema.json`
+- [x] Write author style guide
 - [ ] Draft 30 exercise YAMLs (titles, objectives, hints, acceptance)
 - [ ] Low-fidelity wireframes: problem page, progress page
 
