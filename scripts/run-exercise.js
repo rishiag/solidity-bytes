@@ -70,7 +70,6 @@ function ensurePkg(workdir) {
       name: 'exercise-runner',
       private: true,
       version: '0.0.0',
-      type: 'module',
       scripts: { test: 'hardhat test' },
       dependencies: {
         hardhat: '^2.22.5',
@@ -126,9 +125,10 @@ async function main() {
   writeFiles(doc.tests.files, workdir);
 
   const hhCfg = path.join(workdir, 'hardhat.config.js');
-  if (!fs.existsSync(hhCfg)) {
+  const hhCfgCjs = path.join(workdir, 'hardhat.config.cjs');
+  if (!fs.existsSync(hhCfg) && !fs.existsSync(hhCfgCjs)) {
     fs.writeFileSync(
-      hhCfg,
+      hhCfgCjs,
       'require("@nomicfoundation/hardhat-toolbox");module.exports={solidity:"0.8.20"};'
     );
   }
