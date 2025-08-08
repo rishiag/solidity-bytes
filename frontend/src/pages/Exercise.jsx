@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
+import Editor from '@monaco-editor/react'
 
 export default function Exercise({ id }) {
   const [meta, setMeta] = useState(null)
@@ -7,6 +8,7 @@ export default function Exercise({ id }) {
   const [log, setLog] = useState('')
   const [running, setRunning] = useState(false)
   const [edited, setEdited] = useState({})
+  const [exitCode, setExitCode] = useState(null)
 
   useEffect(() => {
     fetch(`/api/exercises/${id}`)
@@ -18,6 +20,7 @@ export default function Exercise({ id }) {
   const run = async (mode) => {
     setRunning(true)
     setLog('')
+    setExitCode(null)
     try {
       const overrides = []
       if (mode === 'starter' && meta?.starter?.files?.length) {
@@ -44,12 +47,38 @@ export default function Exercise({ id }) {
         setLog(x => x + `\n\n[exit code ${d.code}]`)
         es.close()
         setRunning(false)
+        setExitCode(d.code)
       })
     } catch (e) {
       setError(String(e))
       setRunning(false)
     }
   }
+
+  // Load saved code (if any) on mount/meta load
+  useEffect(() => {
+    if (!meta?.starter?.files) return
+    const key = `sb:code:${id}`
+    const saved = localStorage.getItem(key)
+    if (saved) {
+      try {
+        const obj = JSON.parse(saved)
+        setEdited(obj)
+        return
+      } catch {}
+    }
+    // Initialize with starter contents
+    const init = {}
+    for (const f of meta.starter.files) init[f.path] = f.content
+    setEdited(init)
+  }, [id, meta])
+
+  // Persist on edit
+  useEffect(() => {
+    if (!meta?.starter?.files?.length) return
+    const key = `sb:code:${id}`
+    localStorage.setItem(key, JSON.stringify(edited))
+  }, [edited, id, meta])
 
   if (error) return <div style={{ padding: 16, color: 'red' }}>{error}</div>
   if (!meta) return <div style={{ padding: 16 }}>Loading…</div>
@@ -59,14 +88,30 @@ export default function Exercise({ id }) {
       <a href="#/">← Back</a>
       <h2>{meta.title}</h2>
       <p style={{ whiteSpace: 'pre-wrap' }}>{meta.description}</p>
+      {exitCode !== null && (
+        <div style={{
+          display: 'inline-block',
+          padding: '4px 8px',
+          borderRadius: 6,
+          background: exitCode === 0 ? '#e6ffed' : '#ffe6e6',
+          color: exitCode === 0 ? '#09621a' : '#8a0000',
+          marginBottom: 12
+        }}>
+          {exitCode === 0 ? 'Passed' : 'Failed'}
+        </div>
+      )}
       {meta.starter?.files?.map(f => (
         <div key={f.path} style={{ marginBottom: 12 }}>
           <div style={{ fontFamily: 'monospace' }}>{f.path}</div>
-          <textarea
-            style={{ width: '100%', height: 140 }}
-            defaultValue={f.content}
-            onChange={e => setEdited(prev => ({ ...prev, [f.path]: e.target.value }))}
-          />
+          <div style={{ border: '1px solid #ddd' }}>
+            <Editor
+              height="220px"
+              defaultLanguage={f.path.endsWith('.sol') ? 'sol' : 'javascript'}
+              value={edited[f.path] ?? f.content}
+              onChange={(v) => setEdited(prev => ({ ...prev, [f.path]: v ?? '' }))}
+              options={{ minimap: { enabled: false }, fontSize: 14 }}
+            />
+          </div>
         </div>
       ))}
       <div style={{ marginBottom: 12 }}>
