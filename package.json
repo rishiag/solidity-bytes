@@ -5,7 +5,8 @@
   "license": "MIT",
   "type": "module",
   "scripts": {
-    "run-exercise": "node scripts/run-exercise.js"
+    "run-exercise": "node scripts/run-exercise.js",
+    "validate:track-a": "node scripts/validate-exercises.js --track track-a-basics --vv"
   },
   "dependencies": {
     "@nomicfoundation/hardhat-toolbox": "^4.0.0",
