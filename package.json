@@ -6,7 +6,9 @@
   "type": "module",
   "scripts": {
     "run-exercise": "node scripts/run-exercise.js",
-    "validate:track-a": "node scripts/validate-exercises.js --track track-a-basics --vv"
+    "validate:track-a": "node scripts/validate-exercises.js --track track-a-basics --vv",
+    "docker:build": "docker build -t soliditybytes-runner:local -f docker/runner/Dockerfile .",
+    "docker:run": "bash scripts/run-in-docker.sh"
   },
   "dependencies": {
     "@nomicfoundation/hardhat-toolbox": "^4.0.0",
