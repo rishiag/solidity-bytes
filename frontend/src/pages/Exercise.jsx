@@ -46,7 +46,7 @@ export default function Exercise({ id }) {
         const d = JSON.parse(ev.data)
         setLog(x => x + d.chunk)
       })
-      es.addEventListener('done', (ev) => {
+      es.addEventListener('done', async (ev) => {
         const d = JSON.parse(ev.data)
         setLog(x => x + `\n\n[exit code ${d.code}]`)
         es.close()
