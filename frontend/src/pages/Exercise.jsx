@@ -9,6 +9,7 @@ export default function Exercise({ id }) {
   const [running, setRunning] = useState(false)
   const [edited, setEdited] = useState({})
   const [exitCode, setExitCode] = useState(null)
+  const [summary, setSummary] = useState(null)
 
   useEffect(() => {
     fetch(`/api/exercises/${id}`)
@@ -21,6 +22,7 @@ export default function Exercise({ id }) {
     setRunning(true)
     setLog('')
     setExitCode(null)
+    setSummary(null)
     try {
       const overrides = []
       if (mode === 'starter' && meta?.starter?.files?.length) {
@@ -49,6 +51,11 @@ export default function Exercise({ id }) {
         es.close()
         setRunning(false)
         setExitCode(d.code)
+        // compute mocha summary from final log
+        try {
+          const s = parseMochaSummary(log)
+          setSummary(s)
+        } catch {}
         // cache progress client-side for now, server sync is already persisted
         try {
           const key = 'sb:device'
@@ -111,6 +118,19 @@ export default function Exercise({ id }) {
           {exitCode === 0 ? 'Passed' : 'Failed'}
         </div>
       )}
+      {summary && (
+        <div style={{ margin: '8px 0 12px 0', fontSize: 13 }}>
+          <strong>{summary.passing} passed</strong>
+          {typeof summary.failing === 'number' && `, ${summary.failing} failed`}
+          {summary.failures?.length > 0 && (
+            <ul>
+              {summary.failures.map((t, i) => (
+                <li key={i} style={{ color: '#8a0000' }}>{t}</li>
+              ))}
+            </ul>
+          )}
+        </div>
+      )}
       {meta.starter?.files?.map(f => (
         <div key={f.path} style={{ marginBottom: 12 }}>
           <div style={{ fontFamily: 'monospace' }}>{f.path}</div>
@@ -140,5 +160,24 @@ export default function Exercise({ id }) {
       <pre style={{ background: '#111', color: '#0f0', padding: 12, height: 320, overflow: 'auto' }}>{log || 'Logs will appear here…'}</pre>
     </div>
   )
+}
+
+// Very small parser for Mocha CLI output
+function parseMochaSummary(fullLog) {
+  const text = String(fullLog || '')
+  const passingMatch = text.match(/(\d+)\s+passing/)
+  const failingMatch = text.match(/(\d+)\s+failing/)
+  const failures = []
+  const lines = text.split(/\r?\n/)
+  for (const ln of lines) {
+    // Examples: "  1) Suite name" OR "1) Suite name test name"
+    const m = ln.match(/^\s*(\d+)\)\s+(.+)/)
+    if (m) failures.push(m[2].trim())
+  }
+  return {
+    passing: passingMatch ? Number(passingMatch[1]) : 0,
+    failing: failingMatch ? Number(failingMatch[1]) : (failures.length || 0),
+    failures
+  }
 }
 
