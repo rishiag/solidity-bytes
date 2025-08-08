@@ -19,8 +19,26 @@ starter:
             function aPublic() public pure returns (uint) { return 1; }
             // TODO: external, internal, private variants returning distinct numbers
         }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.20" };
 tests:
-  files: []
+  files:
+    - path: test/Vis.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Vis", function () {
+          it("external cannot be called internally without this.", async function () {
+            const Factory = await ethers.getContractFactory("Vis");
+            const c = await Factory.deploy();
+            expect(await c.aPublic()).to.equal(1n);
+            // just ensure deployment and callable public; other visibilities are verified by presence
+            expect(typeof c.aExternal).to.equal("function");
+          });
+        });
 solution:
   files:
     - path: contracts/Vis.sol

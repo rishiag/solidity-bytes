@@ -18,8 +18,28 @@ starter:
         contract Defaults {
             // TODO: declare various public state variables without initializing
         }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.20" };
 tests:
-  files: []
+  files:
+    - path: test/Defaults.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Defaults", function () {
+          it("exposes default values", async function () {
+            const Factory = await ethers.getContractFactory("Defaults");
+            const c = await Factory.deploy();
+            expect(await c.a()).to.equal(0n);
+            expect(await c.b()).to.equal(0n);
+            expect(await c.c()).to.equal(false);
+            expect(await c.d()).to.equal(ethers.ZeroAddress);
+            expect(await c.e()).to.equal("0x0000000000000000000000000000000000000000000000000000000000000000");
+          });
+        });
 solution:
   files:
     - path: contracts/Defaults.sol

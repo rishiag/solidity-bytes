@@ -21,8 +21,24 @@ starter:
                 return a + b;
             }
         }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.20" };
 tests:
-  files: []
+  files:
+    - path: test/Doc.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Doc", function () {
+          it("adder works; NatSpec presence is manual review", async function () {
+            const Factory = await ethers.getContractFactory("Doc");
+            const c = await Factory.deploy();
+            expect(await c.add(2, 3)).to.equal(5n);
+          });
+        });
 solution:
   files:
     - path: contracts/Doc.sol

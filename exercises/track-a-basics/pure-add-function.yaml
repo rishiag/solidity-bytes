@@ -18,8 +18,24 @@ starter:
         contract Adder {
             // TODO: add(uint a, uint b)
         }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.20" };
 tests:
-  files: []
+  files:
+    - path: test/Adder.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Adder", function () {
+          it("adds two numbers without state", async function () {
+            const Factory = await ethers.getContractFactory("Adder");
+            const c = await Factory.deploy();
+            expect(await c.add(2, 3)).to.equal(5n);
+          });
+        });
 solution:
   files:
     - path: contracts/Adder.sol

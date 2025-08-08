@@ -19,8 +19,26 @@ starter:
         contract Flags {
             // TODO: constant VERSION and immutable DEPLOYER
         }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.20" };
 tests:
-  files: []
+  files:
+    - path: test/Flags.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Flags", function () {
+          it("constant and immutable set correctly", async function () {
+            const [deployer] = await ethers.getSigners();
+            const Factory = await ethers.getContractFactory("Flags");
+            const c = await Factory.deploy();
+            expect(await c.VERSION()).to.equal(1n);
+            expect(await c.DEPLOYER()).to.equal(deployer.address);
+          });
+        });
 solution:
   files:
     - path: contracts/Flags.sol
