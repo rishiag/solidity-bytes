@@ -5,6 +5,8 @@ import path from 'path';
 import { spawn } from 'child_process';
 import YAML from 'yaml';
 import { fileURLToPath } from 'url';
+import session from 'express-session';
+import { OAuth2Client } from 'google-auth-library';
 
 const app = express();
 // Optional allowlist via env FRONTEND_ORIGIN (comma-separated). Defaults to * during MVP.
@@ -17,6 +19,21 @@ app.use(cors({
   }
 }));
 app.use(express.json());
+
+// Session (for auth). On localhost we use non-secure cookies.
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET || 'dev-insecure-secret',
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      sameSite: 'lax',
+      secure: false,
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+    },
+  })
+);
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -63,6 +80,57 @@ function findExerciseById(exerciseId) {
   }
   return null;
 }
+
+// --- Google OAuth (MVP) ---
+function getOAuthClient() {
+  const clientId = process.env.GOOGLE_CLIENT_ID;
+  const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
+  const base = process.env.PUBLIC_BASE_URL || 'http://localhost:3000';
+  const redirectUri = `${base}/api/auth/google/callback`;
+  if (!clientId || !clientSecret) return null;
+  return new OAuth2Client({ clientId, clientSecret, redirectUri });
+}
+
+app.get('/auth/google/start', (req, res) => {
+  const client = getOAuthClient();
+  if (!client) return res.status(500).json({ error: 'oauth_not_configured' });
+  const url = client.generateAuthUrl({
+    access_type: 'offline',
+    prompt: 'select_account',
+    scope: ['openid', 'email', 'profile'],
+  });
+  res.redirect(url);
+});
+
+app.get('/auth/google/callback', async (req, res) => {
+  try {
+    const client = getOAuthClient();
+    if (!client) return res.status(500).send('OAuth not configured');
+    const code = req.query.code;
+    if (!code) return res.status(400).send('Missing code');
+    const { tokens } = await client.getToken(String(code));
+    if (!tokens?.id_token) return res.status(400).send('Missing id_token');
+    const ticket = await client.verifyIdToken({ idToken: tokens.id_token, audience: process.env.GOOGLE_CLIENT_ID });
+    const payload = ticket.getPayload();
+    req.session.user = {
+      id: payload.sub,
+      email: payload.email,
+      name: payload.name,
+      picture: payload.picture,
+    };
+    res.redirect('/#/');
+  } catch (e) {
+    res.status(500).send('Auth failed');
+  }
+});
+
+app.get('/auth/me', (req, res) => {
+  res.json({ user: req.session.user || null });
+});
+
+app.post('/auth/logout', (req, res) => {
+  req.session.destroy(() => res.json({ ok: true }));
+});
 
 app.get('/health', (_req, res) => res.json({ ok: true }));
 
