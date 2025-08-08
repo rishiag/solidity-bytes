@@ -7,7 +7,7 @@ objectives:
 description: |
   Implement functions to expose common global variables.
 hints:
-  - `msg.value` is only non-zero in payable calls.
+  - "`msg.value` is only non-zero in payable calls."
 starter:
   files:
     - path: contracts/Globals.sol

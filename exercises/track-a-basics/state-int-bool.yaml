@@ -9,7 +9,7 @@ description: |
   Add two state variables: a signed integer `int256 n` and a boolean `flag`, both `public`.
 hints:
   - Signed ints are `intX` where X is bits; `int256` is most common.
-  - `public` auto-generates getters.
+  - "`public` auto-generates getters."
 starter:
   files:
     - path: contracts/Vars.sol

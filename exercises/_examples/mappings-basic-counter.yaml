@@ -10,8 +10,8 @@ description: |
   Implement a contract that tracks a per-user counter using a `mapping(address => uint)`.
   
   Requirements:
-  - `increment(uint by)` increases `counters[msg.sender]` by `by`.
-  - `get(address who)` returns the current count for `who`.
+  - "`increment(uint by)` increases `counters[msg.sender]` by `by`."
+  - "`get(address who)` returns the current count for `who`."
   - Emit `Updated(address indexed who, uint newValue)` on increment.
 hints:
   - Default value for unmapped keys is zero.

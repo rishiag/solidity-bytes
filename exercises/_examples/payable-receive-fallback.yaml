@@ -10,11 +10,11 @@ description: |
   Implement a contract that can receive ETH in multiple ways and lets users withdraw their own deposits.
   
   Requirements:
-  - `deposit()` is `payable` and credits `msg.sender`.
-  - `receive()` should also credit `msg.sender` when ETH is sent with empty data.
-  - `fallback()` should not credit but must be `payable` to avoid reverts; emit an event.
-  - `withdraw(uint amount)` sends ETH back to `msg.sender` and reduces their balance; revert on insufficient funds.
-  - `totalReceived()` returns the total ETH ever received.
+  - "`deposit()` is `payable` and credits `msg.sender`."
+  - "`receive()` should also credit `msg.sender` when ETH is sent with empty data."
+  - "`fallback()` should not credit but must be `payable` to avoid reverts; emit an event."
+  - "`withdraw(uint amount)` sends ETH back to `msg.sender` and reduces their balance; revert on insufficient funds."
+  - "`totalReceived()` returns the total ETH ever received."
 hints:
   - Use `address(this).balance` for current balance, but track total separately if needed.
   - Prefer call pattern for sending ETH.

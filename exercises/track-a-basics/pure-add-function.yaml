@@ -7,7 +7,7 @@ objectives:
 description: |
   Create a contract with a `pure` add function that returns the sum of two unsigned integers.
 hints:
-  - `pure` functions cannot read or modify state.
+  - "`pure` functions cannot read or modify state."
 starter:
   files:
     - path: contracts/Adder.sol

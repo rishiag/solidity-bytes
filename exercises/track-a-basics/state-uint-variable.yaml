@@ -10,7 +10,7 @@ description: |
   The compiler will generate a getter `number()` that returns its value.
 hints:
   - State variables are declared at contract level, not inside functions.
-  - `public` automatically creates a getter.
+  - "`public` automatically creates a getter."
 starter:
   files:
     - path: contracts/Number.sol

@@ -15,7 +15,7 @@ description: |
   - `length()` returns the array length.
   - `at(uint index)` returns the element; revert if out of bounds.
 hints:
-  - `push` does not return the new length in Solidity ^0.8.
+  - "`push` does not return the new length in Solidity ^0.8."
   - Use `require(arr.length > 0, "EMPTY")` before popping.
 starter:
   files:

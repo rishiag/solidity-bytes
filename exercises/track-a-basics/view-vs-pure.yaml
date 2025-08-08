@@ -7,7 +7,7 @@ objectives:
 description: |
   Add a `view` function that returns a stored number and a `pure` function that computes `a + b`.
 hints:
-  - `view` may read state; `pure` cannot.
+  - "`view` may read state; `pure` cannot."
 starter:
   files:
     - path: contracts/ViewPure.sol
