@@ -124,6 +124,16 @@ async function main() {
   writeFiles(doc[section].files, workdir);
   writeFiles(doc.tests.files, workdir);
 
+  // Apply overrides from env if provided: RUN_OVERRIDES='[{"path":"contracts/X.sol","content":"..."}]'
+  if (process.env.RUN_OVERRIDES) {
+    try {
+      const overrides = JSON.parse(process.env.RUN_OVERRIDES);
+      if (Array.isArray(overrides)) writeFiles(overrides, workdir);
+    } catch (e) {
+      console.error('Invalid RUN_OVERRIDES JSON; ignoring');
+    }
+  }
+
   const hhCfg = path.join(workdir, 'hardhat.config.js');
   const hhCfgCjs = path.join(workdir, 'hardhat.config.cjs');
   if (!fs.existsSync(hhCfg) && !fs.existsSync(hhCfgCjs)) {

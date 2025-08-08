@@ -6,6 +6,7 @@ export default function Exercise({ id }) {
   const [subId, setSubId] = useState(null)
   const [log, setLog] = useState('')
   const [running, setRunning] = useState(false)
+  const [edited, setEdited] = useState({})
 
   useEffect(() => {
     fetch(`/api/exercises/${id}`)
@@ -18,9 +19,18 @@ export default function Exercise({ id }) {
     setRunning(true)
     setLog('')
     try {
+      const overrides = []
+      if (mode === 'starter' && meta?.starter?.files?.length) {
+        for (const f of meta.starter.files) {
+          const editedContent = edited[f.path]
+          if (editedContent && typeof editedContent === 'string') {
+            overrides.push({ path: f.path, content: editedContent })
+          }
+        }
+      }
       const r = await fetch('/api/submissions', {
         method: 'POST', headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ id, mode })
+        body: JSON.stringify({ id, mode, overrides: overrides.length ? overrides : undefined })
       })
       const j = await r.json()
       setSubId(j.submissionId)
@@ -49,6 +59,16 @@ export default function Exercise({ id }) {
       <a href="#/">← Back</a>
       <h2>{meta.title}</h2>
       <p style={{ whiteSpace: 'pre-wrap' }}>{meta.description}</p>
+      {meta.starter?.files?.map(f => (
+        <div key={f.path} style={{ marginBottom: 12 }}>
+          <div style={{ fontFamily: 'monospace' }}>{f.path}</div>
+          <textarea
+            style={{ width: '100%', height: 140 }}
+            defaultValue={f.content}
+            onChange={e => setEdited(prev => ({ ...prev, [f.path]: e.target.value }))}
+          />
+        </div>
+      ))}
       <div style={{ marginBottom: 12 }}>
         <button onClick={() => run('starter')} disabled={running}>
           Run (starter)
