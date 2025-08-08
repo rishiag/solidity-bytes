@@ -31,9 +31,10 @@ export default function Exercise({ id }) {
           }
         }
       }
+      const deviceId = localStorage.getItem('sb:device') || 'dev-local'
       const r = await fetch('/api/submissions', {
         method: 'POST', headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ id, mode, overrides: overrides.length ? overrides : undefined })
+        body: JSON.stringify({ id, mode, overrides: overrides.length ? overrides : undefined, deviceId })
       })
       const j = await r.json()
       setSubId(j.submissionId)
@@ -48,6 +49,16 @@ export default function Exercise({ id }) {
         es.close()
         setRunning(false)
         setExitCode(d.code)
+        // cache progress client-side for now, server sync is already persisted
+        try {
+          const key = 'sb:device'
+          const dev = localStorage.getItem(key) || deviceId
+          const pgKey = 'sb:progress'
+          const db = JSON.parse(localStorage.getItem(pgKey) || '{}')
+          db[dev] = db[dev] || { solved: {} }
+          if (d.code === 0) db[dev].solved[id] = true
+          localStorage.setItem(pgKey, JSON.stringify(db))
+        } catch {}
       })
     } catch (e) {
       setError(String(e))
@@ -106,7 +117,7 @@ export default function Exercise({ id }) {
           <div style={{ border: '1px solid #ddd' }}>
             <Editor
               height="220px"
-              defaultLanguage={f.path.endsWith('.sol') ? 'sol' : 'javascript'}
+              defaultLanguage={f.path.endsWith('.sol') ? 'plaintext' : 'javascript'}
               value={edited[f.path] ?? f.content}
               onChange={(v) => setEdited(prev => ({ ...prev, [f.path]: v ?? '' }))}
               options={{ minimap: { enabled: false }, fontSize: 14 }}
@@ -121,6 +132,10 @@ export default function Exercise({ id }) {
         <button onClick={() => run('solution')} style={{ marginLeft: 8 }} disabled={running}>
           Run (solution)
         </button>
+        <a href={`#/`} style={{ marginLeft: 12, fontSize: 12 }}>refresh list</a>
+        <a href={`/api/exercises/${id}/solution`} target="_blank" rel="noreferrer" style={{ marginLeft: 12, fontSize: 12 }}>
+          view solution files
+        </a>
       </div>
       <pre style={{ background: '#111', color: '#0f0', padding: 12, height: 320, overflow: 'auto' }}>{log || 'Logs will appear here…'}</pre>
     </div>

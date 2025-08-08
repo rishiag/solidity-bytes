@@ -13,7 +13,21 @@ app.use(express.json());
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const submissions = new Map(); // sid -> { child, startedAt }
+const submissions = new Map(); // sid -> { child, startedAt, exerciseId, deviceId }
+const dataDir = path.join(process.cwd(), '.data');
+const progressFile = path.join(dataDir, 'progress.json');
+function readProgress() {
+  try {
+    if (!fs.existsSync(progressFile)) return {};
+    return JSON.parse(fs.readFileSync(progressFile, 'utf8'));
+  } catch {
+    return {};
+  }
+}
+function writeProgress(obj) {
+  fs.mkdirSync(dataDir, { recursive: true });
+  fs.writeFileSync(progressFile, JSON.stringify(obj, null, 2));
+}
 
 function listExercisesDir(dir) {
   if (!fs.existsSync(dir)) return [];
@@ -71,12 +85,20 @@ app.get('/exercises/:id', (req, res) => {
   res.json(safe);
 });
 
+// Return full solution files for an exercise (MVP: ungated)
+app.get('/exercises/:id/solution', (req, res) => {
+  const doc = findExerciseById(req.params.id);
+  if (!doc) return res.status(404).json({ error: 'not_found' });
+  const files = doc.solution?.files || [];
+  res.json({ id: doc.id, files });
+});
+
 function makeSid() {
   return 'sub_' + Math.random().toString(36).slice(2, 10);
 }
 
 app.post('/submissions', (req, res) => {
-  const { id, mode, overrides } = req.body || {};
+  const { id, mode, overrides, deviceId } = req.body || {};
   if (!id) return res.status(400).json({ error: 'missing_id' });
   const doc = findExerciseById(id);
   if (!doc) return res.status(404).json({ error: 'exercise_not_found' });
@@ -94,7 +116,7 @@ app.post('/submissions', (req, res) => {
     },
   });
 
-  submissions.set(sid, { child, startedAt: Date.now() });
+  submissions.set(sid, { child, startedAt: Date.now(), exerciseId: id, deviceId: deviceId || null });
 
   child.on('close', () => {
     setTimeout(() => submissions.delete(sid), 5 * 60 * 1000);
@@ -125,6 +147,14 @@ app.get('/submissions/:sid/stream', (req, res) => {
   child.stderr.on('data', onStderr);
 
   child.on('close', (code) => {
+    const entry2 = submissions.get(req.params.sid);
+    if (entry2?.deviceId && entry2?.exerciseId && code === 0) {
+      const db = readProgress();
+      const dev = db[entry2.deviceId] || { solved: {} };
+      dev.solved[entry2.exerciseId] = true;
+      db[entry2.deviceId] = dev;
+      writeProgress(db);
+    }
     send('done', { code });
     res.end();
   });
@@ -133,6 +163,14 @@ app.get('/submissions/:sid/stream', (req, res) => {
     child.stdout.off('data', onStdout);
     child.stderr.off('data', onStderr);
   });
+});
+
+// Simple progress fetch by deviceId
+app.get('/progress', (req, res) => {
+  const deviceId = req.query.deviceId;
+  const db = readProgress();
+  if (!deviceId || !db[deviceId]) return res.json({ solved: {} });
+  res.json(db[deviceId]);
 });
 
 const PORT = process.env.PORT || 3001;
