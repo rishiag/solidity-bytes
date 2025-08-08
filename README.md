@@ -22,3 +22,14 @@ Mission: Help developers learn Solidity quickly through hands-on, zero-setup exe
 ### Status
 Planning-in-repo complete. Build will follow the tasks in `docs/TASKS.md`.
 
+### Run locally
+- Backend:
+  - `PORT=3101 npm run server:start`
+- Frontend:
+  - `cd frontend && npm i && npm run dev`
+  - Open the printed URL (3000 or 3001). The API proxy is `/api` → `http://localhost:3101`.
+
+### Production (MVP)
+- Backend: set `PORT` and optional `FRONTEND_ORIGIN` (comma-separated) for CORS.
+- Frontend: `cd frontend && npm run build && npm run preview` (serves at `http://localhost:4173`).
+

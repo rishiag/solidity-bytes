@@ -7,7 +7,15 @@ import YAML from 'yaml';
 import { fileURLToPath } from 'url';
 
 const app = express();
-app.use(cors());
+// Optional allowlist via env FRONTEND_ORIGIN (comma-separated). Defaults to * during MVP.
+const allowlist = (process.env.FRONTEND_ORIGIN || '').split(',').map(s => s.trim()).filter(Boolean);
+app.use(cors({
+  origin: (origin, cb) => {
+    if (allowlist.length === 0) return cb(null, true);
+    if (!origin) return cb(null, false);
+    cb(null, allowlist.includes(origin));
+  }
+}));
 app.use(express.json());
 
 const __filename = fileURLToPath(import.meta.url);
