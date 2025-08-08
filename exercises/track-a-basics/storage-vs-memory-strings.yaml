@@ -19,8 +19,26 @@ starter:
             string private stored;
             // TODO: set(string calldata) and getStored(), getTemp()
         }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.20" };
 tests:
-  files: []
+  files:
+    - path: test/Greetings.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Greetings", function () {
+          it("returns stored string and temp string", async function () {
+            const Factory = await ethers.getContractFactory("Greetings");
+            const c = await Factory.deploy();
+            await c.set("hello");
+            expect(await c.getStored()).to.equal("hello");
+            expect(await c.getTemp()).to.equal("hi");
+          });
+        });
 solution:
   files:
     - path: contracts/Greetings.sol

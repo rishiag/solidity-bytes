@@ -18,8 +18,27 @@ starter:
         contract ProfileStore {
             // TODO: struct Profile and storage instance with set/get
         }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.20" };
 tests:
-  files: []
+  files:
+    - path: test/ProfileStore.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("ProfileStore", function () {
+          it("stores and returns profile", async function () {
+            const Factory = await ethers.getContractFactory("ProfileStore");
+            const c = await Factory.deploy();
+            await c.set("alice", 30);
+            const [name, age] = await c.get();
+            expect(name).to.equal("alice");
+            expect(age).to.equal(30);
+          });
+        });
 solution:
   files:
     - path: contracts/ProfileStore.sol

@@ -19,8 +19,26 @@ starter:
             address public owner;
             // TODO: error NotOwner(); constructor sets owner; function onlyOwner()
         }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.20" };
 tests:
-  files: []
+  files:
+    - path: test/OnlyOwner.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("OnlyOwner", function () {
+          it("reverts for non-owner", async function () {
+            const [owner, other] = await ethers.getSigners();
+            const Factory = await ethers.getContractFactory("OnlyOwner");
+            const c = await Factory.deploy();
+            await c.connect(owner).onlyOwner();
+            await expect(c.connect(other).onlyOwner()).to.be.reverted;
+          });
+        });
 solution:
   files:
     - path: contracts/OnlyOwner.sol

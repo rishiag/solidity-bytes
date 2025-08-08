@@ -18,8 +18,28 @@ starter:
         contract Globals {
             // TODO: functions nowTs(), blockNum(), caller(), sentValue() payable
         }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.20" };
 tests:
-  files: []
+  files:
+    - path: test/Globals.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Globals", function () {
+          it("exposes common globals", async function () {
+            const [a] = await ethers.getSigners();
+            const Factory = await ethers.getContractFactory("Globals");
+            const c = await Factory.deploy();
+            expect(await c.caller()).to.equal(a.address);
+            await expect(c.sentValue()).to.be.reverted; // not payable call
+            const tx = await c.sentValue({ value: 123 });
+            await tx.wait();
+          });
+        });
 solution:
   files:
     - path: contracts/Globals.sol

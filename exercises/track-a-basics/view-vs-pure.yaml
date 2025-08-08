@@ -19,8 +19,25 @@ starter:
             uint private n;
             // TODO: view getter and pure add
         }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.20" };
 tests:
-  files: []
+  files:
+    - path: test/ViewPure.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("ViewPure", function () {
+          it("view reads state; pure computes sum", async function () {
+            const Factory = await ethers.getContractFactory("ViewPure");
+            const c = await Factory.deploy();
+            expect(await c.get()).to.equal(0n);
+            expect(await c.add(3, 4)).to.equal(7n);
+          });
+        });
 solution:
   files:
     - path: contracts/ViewPure.sol

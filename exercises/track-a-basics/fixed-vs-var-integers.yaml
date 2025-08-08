@@ -18,8 +18,25 @@ starter:
         contract Casts {
             // TODO: castTo8(uint256) and castTo256(uint8)
         }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.20" };
 tests:
-  files: []
+  files:
+    - path: test/Casts.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Casts", function () {
+          it("casts between sizes", async function () {
+            const Factory = await ethers.getContractFactory("Casts");
+            const c = await Factory.deploy();
+            expect(await c.castTo8(255)).to.equal(255);
+            expect(await c.castTo256(250)).to.equal(250);
+          });
+        });
 solution:
   files:
     - path: contracts/Casts.sol

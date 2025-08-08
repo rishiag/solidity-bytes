@@ -18,8 +18,26 @@ starter:
         contract TimeUnits {
             // TODO: functions day(), hour(), minute()
         }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.20" };
 tests:
-  files: []
+  files:
+    - path: test/TimeUnits.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("TimeUnits", function () {
+          it("returns standard durations", async function () {
+            const Factory = await ethers.getContractFactory("TimeUnits");
+            const c = await Factory.deploy();
+            expect(await c.dayInSeconds()).to.equal(24n * 60n * 60n);
+            expect(await c.hourInSeconds()).to.equal(60n * 60n);
+            expect(await c.minuteInSeconds()).to.equal(60n);
+          });
+        });
 solution:
   files:
     - path: contracts/TimeUnits.sol

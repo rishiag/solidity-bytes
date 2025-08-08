@@ -18,8 +18,26 @@ starter:
         contract States {
             // TODO: enum State and current state with set/get
         }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.20" };
 tests:
-  files: []
+  files:
+    - path: test/States.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("States", function () {
+          it("sets and gets enum state", async function () {
+            const Factory = await ethers.getContractFactory("States");
+            const c = await Factory.deploy();
+            // enum numeric representation: 0 Idle, 1 Active, 2 Done
+            await c.set(1);
+            expect(await c.get()).to.equal(1);
+          });
+        });
 solution:
   files:
     - path: contracts/States.sol
