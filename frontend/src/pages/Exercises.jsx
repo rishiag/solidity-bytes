@@ -31,28 +31,29 @@ export default function Exercises() {
       })
   }, [])
 
-  if (loading) return <div style={{ padding: 16 }}>Loading…</div>
-  if (error) return <div style={{ padding: 16, color: 'red' }}>{error}</div>
+  if (loading) return <div className="panel">Loading…</div>
+  if (error) return <div className="panel" style={{ color: 'var(--danger)' }}>{error}</div>
 
   return (
-    <div style={{ padding: 16 }}>
-      <h2>Track A — Variables & Basics</h2>
-      <ul>
+    <div>
+      <h2 style={{ margin: '8px 0 12px 0' }}>Track A — Variables & Basics</h2>
+      <div className="list">
         {items.map(x => {
           const solved = progress[x.id]
           return (
-            <li key={x.id}>
-              <a href={`#/exercises/${x.id}`}>{x.title}</a>
-              <span style={{ marginLeft: 8, fontSize: 12, color: '#666' }}>
-                [{x.difficulty}] {x.tags?.join(', ')}
-              </span>
-              {solved && (
-                <span style={{ marginLeft: 8, fontSize: 12, color: '#09621a' }}>✓ solved</span>
-              )}
-            </li>
+            <div key={x.id} className="card">
+              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                <a href={`#/exercises/${x.id}`} style={{ color: 'inherit', textDecoration: 'none' }}>{x.title}</a>
+                {solved && <span className="badge success">solved</span>}
+              </div>
+              <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                <span className="chip">{x.difficulty}</span>
+                {x.tags?.slice(0, 3).map(t => <span key={t} className="chip">{t}</span>)}
+              </div>
+            </div>
           )
         })}
-      </ul>
+      </div>
     </div>
   )
 }

@@ -10,10 +10,38 @@ export default function App() {
     return () => window.removeEventListener('hashchange', onHash)
   }, [])
 
+  const Header = () => (
+    <div className="header">
+      <div className="container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', height: 56 }}>
+        <a href="#/" className="brand" style={{ textDecoration: 'none', color: 'inherit' }}>Soliditybytes</a>
+        <div style={{ display: 'flex', gap: 12 }}>
+          <a className="chip" href="#/">Exercises</a>
+          <a className="chip" href="https://soliditylang.org/" target="_blank" rel="noreferrer">Docs</a>
+        </div>
+      </div>
+    </div>
+  )
+
+  const Container = ({ children }) => <div className="container">{children}</div>
+
   if (route.startsWith('/exercises/')) {
     const id = route.split('/exercises/')[1]
-    return <Exercise id={id} />
+    return (
+      <>
+        <Header />
+        <Container>
+          <Exercise id={id} />
+        </Container>
+      </>
+    )
   }
-  return <Exercises />
+  return (
+    <>
+      <Header />
+      <Container>
+        <Exercises />
+      </Container>
+    </>
+  )
 }
 

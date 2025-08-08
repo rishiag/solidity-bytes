@@ -10,6 +10,7 @@ export default function Exercise({ id }) {
   const [edited, setEdited] = useState({})
   const [exitCode, setExitCode] = useState(null)
   const [summary, setSummary] = useState(null)
+  const [showHints, setShowHints] = useState(false)
 
   useEffect(() => {
     fetch(`/api/exercises/${id}`)
@@ -98,66 +99,77 @@ export default function Exercise({ id }) {
     localStorage.setItem(key, JSON.stringify(edited))
   }, [edited, id, meta])
 
-  if (error) return <div style={{ padding: 16, color: 'red' }}>{error}</div>
-  if (!meta) return <div style={{ padding: 16 }}>Loading…</div>
+  if (error) return <div className="panel" style={{ color: 'var(--danger)' }}>{error}</div>
+  if (!meta) return <div className="panel">Loading…</div>
 
   return (
-    <div style={{ padding: 16 }}>
-      <a href="#/">← Back</a>
-      <h2>{meta.title}</h2>
-      <p style={{ whiteSpace: 'pre-wrap' }}>{meta.description}</p>
-      {exitCode !== null && (
-        <div style={{
-          display: 'inline-block',
-          padding: '4px 8px',
-          borderRadius: 6,
-          background: exitCode === 0 ? '#e6ffed' : '#ffe6e6',
-          color: exitCode === 0 ? '#09621a' : '#8a0000',
-          marginBottom: 12
-        }}>
-          {exitCode === 0 ? 'Passed' : 'Failed'}
-        </div>
-      )}
-      {summary && (
-        <div style={{ margin: '8px 0 12px 0', fontSize: 13 }}>
-          <strong>{summary.passing} passed</strong>
-          {typeof summary.failing === 'number' && `, ${summary.failing} failed`}
-          {summary.failures?.length > 0 && (
-            <ul>
-              {summary.failures.map((t, i) => (
-                <li key={i} style={{ color: '#8a0000' }}>{t}</li>
-              ))}
-            </ul>
+    <div>
+      <div className="sticky">
+        <span className="chip mono">{id}</span>
+        <button className="btn" onClick={() => run('starter')} disabled={running}>Run (starter)</button>
+        <button className="btn secondary" onClick={() => run('solution')} disabled={running}>Run (solution)</button>
+        {exitCode !== null && (
+          <span className={`badge ${exitCode === 0 ? 'success' : 'danger'}`} style={{ marginLeft: 8 }}>
+            {exitCode === 0 ? 'Passed' : 'Failed'}
+          </span>
+        )}
+        {summary && (
+          <span className="muted" style={{ marginLeft: 8 }}>
+            {summary.passing} passed{typeof summary.failing === 'number' ? `, ${summary.failing} failed` : ''}
+          </span>
+        )}
+        <a href={`#/`} className="chip" style={{ marginLeft: 'auto' }}>Back to list</a>
+        <a href={`/api/exercises/${id}/solution`} target="_blank" rel="noreferrer" className="chip" style={{ marginLeft: 8 }}>Solution</a>
+      </div>
+
+      <div className="row" style={{ marginTop: 12 }}>
+        <div className="col">
+          <div className="panel">
+            <h2 style={{ marginTop: 0 }}>{meta.title}</h2>
+            <p className="muted" style={{ marginTop: 4 }}>[{meta.difficulty}] {meta.tags?.join(', ')}</p>
+            <p style={{ whiteSpace: 'pre-wrap' }}>{meta.description}</p>
+            <div style={{ marginTop: 8 }}>
+              <button className="btn secondary" onClick={() => setShowHints(v => !v)}>
+                {showHints ? 'Hide hints' : 'Show hints'}
+              </button>
+              {showHints && (
+                <ul style={{ marginTop: 8 }}>
+                  {(meta.hints || []).map((h, i) => <li key={i} className="muted">{h}</li>)}
+                </ul>
+              )}
+            </div>
+          </div>
+
+          {summary?.failures?.length > 0 && (
+            <div className="panel" style={{ marginTop: 12 }}>
+              <strong>Failing tests</strong>
+              <ul>
+                {summary.failures.map((t, i) => <li key={i} style={{ color: 'var(--danger)' }}>{t}</li>)}
+              </ul>
+            </div>
           )}
         </div>
-      )}
-      {meta.starter?.files?.map(f => (
-        <div key={f.path} style={{ marginBottom: 12 }}>
-          <div style={{ fontFamily: 'monospace' }}>{f.path}</div>
-          <div style={{ border: '1px solid #ddd' }}>
-            <Editor
-              height="220px"
-              defaultLanguage={f.path.endsWith('.sol') ? 'plaintext' : 'javascript'}
-              value={edited[f.path] ?? f.content}
-              onChange={(v) => setEdited(prev => ({ ...prev, [f.path]: v ?? '' }))}
-              options={{ minimap: { enabled: false }, fontSize: 14 }}
-            />
-          </div>
+
+        <div className="col">
+          {meta.starter?.files?.map(f => (
+            <div key={f.path} className="panel" style={{ marginBottom: 12 }}>
+              <div className="mono" style={{ marginBottom: 6 }}>{f.path}</div>
+              <Editor
+                height="220px"
+                theme="vs-dark"
+                defaultLanguage={f.path.endsWith('.sol') ? 'plaintext' : 'javascript'}
+                value={edited[f.path] ?? f.content}
+                onChange={(v) => setEdited(prev => ({ ...prev, [f.path]: v ?? '' }))}
+                options={{ minimap: { enabled: false }, fontSize: 14, scrollBeyondLastLine: false }}
+              />
+            </div>
+          ))}
         </div>
-      ))}
-      <div style={{ marginBottom: 12 }}>
-        <button onClick={() => run('starter')} disabled={running}>
-          Run (starter)
-        </button>
-        <button onClick={() => run('solution')} style={{ marginLeft: 8 }} disabled={running}>
-          Run (solution)
-        </button>
-        <a href={`#/`} style={{ marginLeft: 12, fontSize: 12 }}>refresh list</a>
-        <a href={`/api/exercises/${id}/solution`} target="_blank" rel="noreferrer" style={{ marginLeft: 12, fontSize: 12 }}>
-          view solution files
-        </a>
       </div>
-      <pre style={{ background: '#111', color: '#0f0', padding: 12, height: 320, overflow: 'auto' }}>{log || 'Logs will appear here…'}</pre>
+
+      <div className="panel" style={{ marginTop: 12 }}>
+        <div className="mono log">{log || 'Logs will appear here…'}</div>
+      </div>
     </div>
   )
 }
