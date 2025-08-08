@@ -1,0 +1,36 @@
+id: time-units
+title: Use Solidity time units
+difficulty: beginner
+tags: [time, globals, basics]
+objectives:
+  - Use `1 days`, `1 hours`, `1 minutes` in arithmetic
+description: |
+  Implement functions that return common durations using Solidity's time units.
+hints:
+  - Time units are suffixes on literals, e.g., `1 days`.
+starter:
+  files:
+    - path: contracts/TimeUnits.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.20;
+
+        contract TimeUnits {
+            // TODO: functions day(), hour(), minute()
+        }
+tests:
+  files: []
+solution:
+  files:
+    - path: contracts/TimeUnits.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.20;
+
+        contract TimeUnits {
+            function dayInSeconds() external pure returns (uint) { return 1 days; }
+            function hourInSeconds() external pure returns (uint) { return 1 hours; }
+            function minuteInSeconds() external pure returns (uint) { return 1 minutes; }
+        }
+visibility: after-pass
+

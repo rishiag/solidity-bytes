@@ -1,0 +1,40 @@
+id: constant-and-immutable
+title: Use constant and immutable state variables
+difficulty: beginner
+tags: [variables, constants, basics]
+objectives:
+  - Add `uint256 public constant VERSION = 1`
+  - Add `address public immutable DEPLOYER` set in constructor
+description: |
+  Demonstrate constants and immutables. Constants are compile-time; immutables are set once in constructor.
+hints:
+  - Use `constructor()` to set the immutable to `msg.sender`.
+starter:
+  files:
+    - path: contracts/Flags.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.20;
+
+        contract Flags {
+            // TODO: constant VERSION and immutable DEPLOYER
+        }
+tests:
+  files: []
+solution:
+  files:
+    - path: contracts/Flags.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.20;
+
+        contract Flags {
+            uint256 public constant VERSION = 1;
+            address public immutable DEPLOYER;
+
+            constructor() {
+                DEPLOYER = msg.sender;
+            }
+        }
+visibility: after-pass
+

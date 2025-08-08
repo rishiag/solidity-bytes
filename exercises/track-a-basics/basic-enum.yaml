@@ -1,0 +1,37 @@
+id: basic-enum
+title: Define and use an enum
+difficulty: beginner
+tags: [enums, basics]
+objectives:
+  - Define an enum and set/get its value
+description: |
+  Create an enum `State { Idle, Active, Done }` and functions to set and get the current state.
+hints:
+  - Enums are zero-based; default is the first value.
+starter:
+  files:
+    - path: contracts/States.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.20;
+
+        contract States {
+            // TODO: enum State and current state with set/get
+        }
+tests:
+  files: []
+solution:
+  files:
+    - path: contracts/States.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.20;
+
+        contract States {
+            enum State { Idle, Active, Done }
+            State private current;
+            function set(State s) external { current = s; }
+            function get() external view returns (State) { return current; }
+        }
+visibility: after-pass
+

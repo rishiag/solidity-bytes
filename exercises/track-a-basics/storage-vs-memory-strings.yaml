@@ -1,0 +1,38 @@
+id: storage-vs-memory-strings
+title: Return strings from storage vs memory
+difficulty: beginner
+tags: [strings, storage, memory, basics]
+objectives:
+  - Store a string and return it; also return a computed memory string
+description: |
+  Store a greeting and implement functions to return the stored value and a computed memory string (e.g., "hi").
+hints:
+  - Returning `string memory` copies storage to memory.
+starter:
+  files:
+    - path: contracts/Greetings.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.20;
+
+        contract Greetings {
+            string private stored;
+            // TODO: set(string calldata) and getStored(), getTemp()
+        }
+tests:
+  files: []
+solution:
+  files:
+    - path: contracts/Greetings.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.20;
+
+        contract Greetings {
+            string private stored;
+            function set(string calldata s) external { stored = s; }
+            function getStored() external view returns (string memory) { return stored; }
+            function getTemp() external pure returns (string memory) { return "hi"; }
+        }
+visibility: after-pass
+

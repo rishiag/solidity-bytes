@@ -1,0 +1,41 @@
+id: constructor-init-uint
+title: Initialize a uint256 in the constructor
+difficulty: beginner
+tags: [variables, constructor, basics]
+objectives:
+  - Add a constructor that takes `uint256 initial` and sets state
+  - Verify getter returns the initial value
+description: |
+  Implement a constructor that accepts `uint256 initial` and assigns it to `number`.
+hints:
+  - Constructors run once at deployment.
+starter:
+  files:
+    - path: contracts/InitNumber.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.20;
+
+        contract InitNumber {
+            uint256 public number;
+
+            // TODO: constructor(uint256 initial) { ... }
+        }
+tests:
+  files: []
+solution:
+  files:
+    - path: contracts/InitNumber.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.20;
+
+        contract InitNumber {
+            uint256 public number;
+
+            constructor(uint256 initial) {
+                number = initial;
+            }
+        }
+visibility: after-pass
+

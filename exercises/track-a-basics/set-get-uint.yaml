@@ -1,0 +1,41 @@
+id: set-get-uint
+title: Add a setter for a uint256 state variable
+difficulty: beginner
+tags: [variables, functions, basics]
+objectives:
+  - Implement `setNumber(uint256 value)` to update state
+  - Verify public getter returns the updated value
+description: |
+  Add a function `setNumber(uint256 value)` that updates `number`.
+hints:
+  - Use `number = value;` inside the function.
+starter:
+  files:
+    - path: contracts/NumberSetter.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.20;
+
+        contract NumberSetter {
+            uint256 public number;
+
+            // TODO: implement setNumber(uint256 value)
+        }
+tests:
+  files: []
+solution:
+  files:
+    - path: contracts/NumberSetter.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.20;
+
+        contract NumberSetter {
+            uint256 public number;
+
+            function setNumber(uint256 value) external {
+                number = value;
+            }
+        }
+visibility: after-pass
+

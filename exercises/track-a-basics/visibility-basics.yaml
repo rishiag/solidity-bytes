@@ -1,0 +1,42 @@
+id: visibility-basics
+title: Implement public, external, internal, and private functions
+difficulty: beginner
+tags: [functions, visibility, basics]
+objectives:
+  - Create one function per visibility and understand accessibility
+description: |
+  Implement four functions with different visibilities. External functions cannot be called internally without `this.`.
+hints:
+  - `internal` is callable within the contract and derived contracts.
+starter:
+  files:
+    - path: contracts/Vis.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.20;
+
+        contract Vis {
+            function aPublic() public pure returns (uint) { return 1; }
+            // TODO: external, internal, private variants returning distinct numbers
+        }
+tests:
+  files: []
+solution:
+  files:
+    - path: contracts/Vis.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.20;
+
+        contract Vis {
+            function aPublic() public pure returns (uint) { return 1; }
+            function aExternal() external pure returns (uint) { return 2; }
+            function aInternal() internal pure returns (uint) { return 3; }
+            function aPrivate() private pure returns (uint) { return 4; }
+
+            function callInternal() external pure returns (uint) {
+                return aInternal();
+            }
+        }
+visibility: after-pass
+

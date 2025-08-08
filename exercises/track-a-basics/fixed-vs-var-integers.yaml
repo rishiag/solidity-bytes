@@ -1,0 +1,35 @@
+id: fixed-vs-var-integers
+title: Work with fixed-size integers and casting
+difficulty: beginner
+tags: [integers, casting, basics]
+objectives:
+  - Demonstrate `uint8`, `uint256` and casting between sizes
+description: |
+  Add functions that cast between `uint8` and `uint256`, and show overflow is checked in Solidity ^0.8.
+hints:
+  - Use `uint8(x)` and `uint256(y)` casts.
+starter:
+  files:
+    - path: contracts/Casts.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.20;
+
+        contract Casts {
+            // TODO: castTo8(uint256) and castTo256(uint8)
+        }
+tests:
+  files: []
+solution:
+  files:
+    - path: contracts/Casts.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.20;
+
+        contract Casts {
+            function castTo8(uint256 x) external pure returns (uint8) { return uint8(x); }
+            function castTo256(uint8 x) external pure returns (uint256) { return uint256(x); }
+        }
+visibility: after-pass
+

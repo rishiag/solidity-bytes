@@ -1,0 +1,46 @@
+id: comments-and-natspec
+title: Add NatSpec comments to a contract and its functions
+difficulty: beginner
+tags: [natspec, docs, basics]
+objectives:
+  - Use `@title`, `@notice`, `@dev`, and `@param`/`@return`
+description: |
+  Add NatSpec comments to improve readability and documentation.
+hints:
+  - Place triple-slash `///` comments immediately above declarations.
+starter:
+  files:
+    - path: contracts/Doc.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.20;
+
+        contract Doc {
+            // TODO: add NatSpec on contract and function
+            function add(uint a, uint b) external pure returns (uint) {
+                return a + b;
+            }
+        }
+tests:
+  files: []
+solution:
+  files:
+    - path: contracts/Doc.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.20;
+
+        /// @title Simple adder
+        /// @notice Demonstrates NatSpec usage
+        contract Doc {
+            /// @notice Returns the sum of two unsigned integers
+            /// @dev Does not check for overflow (safe in ^0.8)
+            /// @param a First addend
+            /// @param b Second addend
+            /// @return sum The result of a + b
+            function add(uint a, uint b) external pure returns (uint sum) {
+                sum = a + b;
+            }
+        }
+visibility: after-pass
+

@@ -1,0 +1,36 @@
+id: pure-add-function
+title: Implement a pure add function
+difficulty: beginner
+tags: [functions, pure, basics]
+objectives:
+  - Implement `function add(uint a, uint b) public pure returns (uint)`
+description: |
+  Create a contract with a `pure` add function that returns the sum of two unsigned integers.
+hints:
+  - `pure` functions cannot read or modify state.
+starter:
+  files:
+    - path: contracts/Adder.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.20;
+
+        contract Adder {
+            // TODO: add(uint a, uint b)
+        }
+tests:
+  files: []
+solution:
+  files:
+    - path: contracts/Adder.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.20;
+
+        contract Adder {
+            function add(uint a, uint b) public pure returns (uint) {
+                return a + b;
+            }
+        }
+visibility: after-pass
+

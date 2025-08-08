@@ -1,0 +1,35 @@
+id: state-address
+title: Declare a public address state variable
+difficulty: beginner
+tags: [variables, basics]
+objectives:
+  - Declare `address public owner`
+  - Understand default address is `0x000...0`
+description: |
+  Declare an `address` state variable named `owner` with `public` visibility.
+hints:
+  - `address` is a 20-byte value; default is zero address.
+starter:
+  files:
+    - path: contracts/Owning.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.20;
+
+        contract Owning {
+            // TODO: address public owner;
+        }
+tests:
+  files: []
+solution:
+  files:
+    - path: contracts/Owning.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.20;
+
+        contract Owning {
+            address public owner;
+        }
+visibility: after-pass
+

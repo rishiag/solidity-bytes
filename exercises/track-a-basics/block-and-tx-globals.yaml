@@ -1,0 +1,37 @@
+id: block-and-tx-globals
+title: Read block and transaction globals
+difficulty: beginner
+tags: [globals, basics]
+objectives:
+  - Return `block.timestamp`, `block.number`, `msg.sender`, and `msg.value`
+description: |
+  Implement functions to expose common global variables.
+hints:
+  - `msg.value` is only non-zero in payable calls.
+starter:
+  files:
+    - path: contracts/Globals.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.20;
+
+        contract Globals {
+            // TODO: functions nowTs(), blockNum(), caller(), sentValue() payable
+        }
+tests:
+  files: []
+solution:
+  files:
+    - path: contracts/Globals.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.20;
+
+        contract Globals {
+            function nowTs() external view returns (uint) { return block.timestamp; }
+            function blockNum() external view returns (uint) { return block.number; }
+            function caller() external view returns (address) { return msg.sender; }
+            function sentValue() external payable returns (uint) { return msg.value; }
+        }
+visibility: after-pass
+

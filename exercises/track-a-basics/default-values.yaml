@@ -1,0 +1,38 @@
+id: default-values
+title: Explore default values of uninitialized types
+difficulty: beginner
+tags: [variables, basics]
+objectives:
+  - Expose defaults for `uint`, `int`, `bool`, `address`, and `bytes32`
+description: |
+  Add public state variables for several types and observe defaults: `0`, `false`, zero address, zero bytes.
+hints:
+  - Use `public` getters to read values.
+starter:
+  files:
+    - path: contracts/Defaults.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.20;
+
+        contract Defaults {
+            // TODO: declare various public state variables without initializing
+        }
+tests:
+  files: []
+solution:
+  files:
+    - path: contracts/Defaults.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.20;
+
+        contract Defaults {
+            uint public a;
+            int public b;
+            bool public c;
+            address public d;
+            bytes32 public e;
+        }
+visibility: after-pass
+

@@ -1,0 +1,42 @@
+id: bytes-vs-string
+title: Compare bytes and string basics
+difficulty: beginner
+tags: [bytes, string, basics]
+objectives:
+  - Set/return `bytes` and `string` and compare via hashing
+description: |
+  Implement setters/getters for `bytes` and `string`. Add a function that compares two strings using `keccak256(bytes(s))`.
+hints:
+  - Direct string equality is not supported; hash for comparison.
+starter:
+  files:
+    - path: contracts/StringsBytes.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.20;
+
+        contract StringsBytes {
+            // TODO: implement set/get for bytes and string; add equals(string,string)
+        }
+tests:
+  files: []
+solution:
+  files:
+    - path: contracts/StringsBytes.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.20;
+
+        contract StringsBytes {
+            bytes private b;
+            string private s;
+            function setBytes(bytes calldata x) external { b = x; }
+            function setString(string calldata x) external { s = x; }
+            function getBytes() external view returns (bytes memory) { return b; }
+            function getString() external view returns (string memory) { return s; }
+            function equals(string calldata a, string calldata c) external pure returns (bool) {
+                return keccak256(bytes(a)) == keccak256(bytes(c));
+            }
+        }
+visibility: after-pass
+

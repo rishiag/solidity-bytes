@@ -1,0 +1,37 @@
+id: view-vs-pure
+title: Distinguish view and pure functions
+difficulty: beginner
+tags: [functions, view, pure, basics]
+objectives:
+  - Implement one `view` getter and one `pure` calculator
+description: |
+  Add a `view` function that returns a stored number and a `pure` function that computes `a + b`.
+hints:
+  - `view` may read state; `pure` cannot.
+starter:
+  files:
+    - path: contracts/ViewPure.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.20;
+
+        contract ViewPure {
+            uint private n;
+            // TODO: view getter and pure add
+        }
+tests:
+  files: []
+solution:
+  files:
+    - path: contracts/ViewPure.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.20;
+
+        contract ViewPure {
+            uint private n;
+            function get() external view returns (uint) { return n; }
+            function add(uint a, uint b) external pure returns (uint) { return a + b; }
+        }
+visibility: after-pass
+

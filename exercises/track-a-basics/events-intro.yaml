@@ -1,0 +1,40 @@
+id: events-intro
+title: Define and emit a basic event
+difficulty: beginner
+tags: [events, basics]
+objectives:
+  - Define `event Updated(uint256 value)` and emit it in `set(uint256)`
+description: |
+  Create a setter that updates a number and emits an event.
+hints:
+  - Use indexed parameters when helpful for filtering.
+starter:
+  files:
+    - path: contracts/Eventful.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.20;
+
+        contract Eventful {
+            uint256 public number;
+            // TODO: event Updated(uint256 value); set(uint256)
+        }
+tests:
+  files: []
+solution:
+  files:
+    - path: contracts/Eventful.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.20;
+
+        contract Eventful {
+            event Updated(uint256 value);
+            uint256 public number;
+            function set(uint256 v) external {
+                number = v;
+                emit Updated(v);
+            }
+        }
+visibility: after-pass
+
