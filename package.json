@@ -1,0 +1,26 @@
+{
+  "name": "soliditybytes",
+  "private": true,
+  "version": "0.1.0",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "run-exercise": "node scripts/run-exercise.js"
+  },
+  "dependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^4.0.0",
+    "chai": "^4.3.10",
+    "ethers": "^6.12.0",
+    "fs-extra": "^11.2.0",
+    "glob": "^10.3.10",
+    "hardhat": "^2.22.5",
+    "mocha": "^10.4.0",
+    "yaml": "^2.4.2"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.2",
+    "prettier-plugin-solidity": "^1.3.1",
+    "solhint": "^4.5.3"
+  }
+}
+
