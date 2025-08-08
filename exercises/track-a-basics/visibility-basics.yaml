@@ -7,7 +7,7 @@ objectives:
 description: |
   Implement four functions with different visibilities. External functions cannot be called internally without `this.`.
 hints:
-  - `internal` is callable within the contract and derived contracts.
+  - "`internal` is callable within the contract and derived contracts."
 starter:
   files:
     - path: contracts/Vis.sol

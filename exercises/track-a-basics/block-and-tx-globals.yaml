@@ -35,9 +35,9 @@ tests:
             const Factory = await ethers.getContractFactory("Globals");
             const c = await Factory.deploy();
             expect(await c.caller()).to.equal(a.address);
-            await expect(c.sentValue()).to.be.reverted; // not payable call
-            const tx = await c.sentValue({ value: 123 });
-            await tx.wait();
+            // static call to get return values without tx
+            expect(await c.sentValue.staticCall()).to.equal(0);
+            expect(await c.sentValue.staticCall({ value: 123 })).to.equal(123);
           });
         });
 solution:
