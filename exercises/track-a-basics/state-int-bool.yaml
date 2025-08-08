@@ -20,8 +20,25 @@ starter:
         contract Vars {
             // TODO
         }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.20" };
 tests:
-  files: []
+  files:
+    - path: test/Vars.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Vars", function () {
+          it("exposes defaults via public getters", async function () {
+            const Factory = await ethers.getContractFactory("Vars");
+            const c = await Factory.deploy();
+            expect(await c.n()).to.equal(0n);
+            expect(await c.flag()).to.equal(false);
+          });
+        });
 solution:
   files:
     - path: contracts/Vars.sol

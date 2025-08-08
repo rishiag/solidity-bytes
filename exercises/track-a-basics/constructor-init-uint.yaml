@@ -21,8 +21,24 @@ starter:
 
             // TODO: constructor(uint256 initial) { ... }
         }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.20" };
 tests:
-  files: []
+  files:
+    - path: test/InitNumber.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("InitNumber", function () {
+          it("sets initial value via constructor", async function () {
+            const Factory = await ethers.getContractFactory("InitNumber");
+            const c = await Factory.deploy(42);
+            expect(await c.number()).to.equal(42n);
+          });
+        });
 solution:
   files:
     - path: contracts/InitNumber.sol

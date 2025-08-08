@@ -19,8 +19,24 @@ starter:
         contract Owning {
             // TODO: address public owner;
         }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.20" };
 tests:
-  files: []
+  files:
+    - path: test/Owning.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Owning", function () {
+          it("owner defaults to zero address", async function () {
+            const Factory = await ethers.getContractFactory("Owning");
+            const c = await Factory.deploy();
+            expect(await c.owner()).to.equal(ethers.ZeroAddress);
+          });
+        });
 solution:
   files:
     - path: contracts/Owning.sol

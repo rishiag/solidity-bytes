@@ -21,8 +21,25 @@ starter:
         contract Number {
             // TODO: declare public uint256 number
         }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.20" };
 tests:
-  files: []
+  files:
+    - path: test/Number.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Number", function () {
+          it("has a public getter with default 0", async function () {
+            const Factory = await ethers.getContractFactory("Number");
+            const c = await Factory.deploy();
+            const val = await c.number();
+            expect(val).to.equal(0n);
+          });
+        });
 solution:
   files:
     - path: contracts/Number.sol
