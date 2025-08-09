@@ -3,6 +3,7 @@ import { Helmet } from 'react-helmet'
 import { AppBar, Toolbar, Container as MContainer, Typography, Button, Link as MLink, Box, Stack, Avatar } from '@mui/material'
 import Exercises from './Exercises.jsx'
 import Exercise from './Exercise.jsx'
+import NotFound from './NotFound.jsx'
 
 export default function App() {
   const [route, setRoute] = useState(window.location.hash.replace('#', '') || '/')
@@ -70,15 +71,25 @@ export default function App() {
       </>
     )
   }
+  if (route === '/' || route === '') {
+    return (
+      <>
+        <Helmet>
+          <title>Soliditybytes — Learn Solidity with interactive exercises</title>
+          <link rel="canonical" href={`https://soliditybytes.com/`} />
+        </Helmet>
+        <Header />
+        <Container>
+          <Exercises />
+        </Container>
+      </>
+    )
+  }
   return (
     <>
-      <Helmet>
-        <title>Soliditybytes — Learn Solidity with interactive exercises</title>
-        <link rel="canonical" href={`https://soliditybytes.com/`} />
-      </Helmet>
       <Header />
       <Container>
-        <Exercises />
+        <NotFound />
       </Container>
     </>
   )
