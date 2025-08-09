@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react'
+import { Grid, Card, CardContent, CardActions, Typography, Chip, Alert, Skeleton, Stack, Button, Link as MLink } from '@mui/material'
 
 export default function Exercises() {
   const [items, setItems] = useState([])
@@ -49,29 +50,38 @@ export default function Exercises() {
     load()
   }, [user])
 
-  if (loading) return <div className="panel">Loading…</div>
-  if (error) return <div className="panel" style={{ color: 'var(--danger)' }}>{error}</div>
+  if (loading) return <Skeleton variant="rectangular" height={40} sx={{ my: 2 }} />
+  if (error) return <Alert severity="error" sx={{ my: 2 }}>{error}</Alert>
 
   return (
     <div>
-      <h2 style={{ margin: '8px 0 12px 0' }}>Track A — Variables & Basics</h2>
-      <div className="list">
+      <Typography variant="h6" sx={{ mt: 1, mb: 2 }}>Track A — Variables & Basics</Typography>
+      <Grid container spacing={2} alignItems="stretch">
         {items.map(x => {
           const solved = progress[x.id]
           return (
-            <div key={x.id} className="card">
-              <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                <a href={`#/exercises/${x.id}`} style={{ color: 'inherit', textDecoration: 'none' }}>{x.title}</a>
-                {solved && <span className="badge success">solved</span>}
-              </div>
-              <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-                <span className="chip">{x.difficulty}</span>
-                {x.tags?.slice(0, 3).map(t => <span key={t} className="chip">{t}</span>)}
-              </div>
-            </div>
+            <Grid item xs={12} sm={6} md={4} key={x.id} sx={{ display: 'flex' }}>
+              <Card variant="outlined" sx={{ height: '100%', display: 'flex', flexDirection: 'column', width: '100%' }}>
+                <CardContent sx={{ flexGrow: 1 }}>
+                  <Stack direction="row" justifyContent="space-between" alignItems="flex-start" gap={1}>
+                    <MLink href={`#/exercises/${x.id}`} underline="hover" color="primary" sx={{ fontWeight: 600, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
+                      {x.title}
+                    </MLink>
+                    {solved && <Chip size="small" label="solved" color="success" />}
+                  </Stack>
+                  <Stack direction="row" spacing={1} sx={{ mt: 1, flexWrap: 'wrap' }}>
+                    <Chip size="small" label={x.difficulty} />
+                    {x.tags?.slice(0, 3).map(t => <Chip key={t} size="small" label={t} />)}
+                  </Stack>
+                </CardContent>
+                <CardActions sx={{ pt: 0, mt: 'auto', justifyContent: 'flex-end' }}>
+                  <Button size="small" href={`#/exercises/${x.id}`}>Open</Button>
+                </CardActions>
+              </Card>
+            </Grid>
           )
         })}
-      </div>
+      </Grid>
     </div>
   )
 }
