@@ -135,6 +135,27 @@ app.post('/auth/logout', (req, res) => {
 
 app.get('/health', (_req, res) => res.json({ ok: true }));
 
+// Basic sitemap.xml (list exercises and core pages)
+app.get('/sitemap.xml', (_req, res) => {
+  const base = process.env.PUBLIC_BASE_URL || 'http://localhost:3000';
+  const dir = path.join(process.cwd(), 'exercises', 'track-a-basics');
+  const urls = [
+    `${base}/`,
+    `${base}/#/`,
+  ];
+  for (const p of listExercisesDir(dir)) {
+    try {
+      const d = readExerciseDoc(p);
+      if (d?.id) urls.push(`${base}/#/exercises/${d.id}`);
+    } catch {}
+  }
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urls
+    .map(u => `  <url><loc>${u}</loc></url>`)
+    .join('\n')}\n</urlset>`;
+  res.set('Content-Type', 'application/xml');
+  res.send(xml);
+});
+
 app.get('/exercises', (_req, res) => {
   const dir = path.join(process.cwd(), 'exercises', 'track-a-basics');
   const items = listExercisesDir(dir).map((p) => {
