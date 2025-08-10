@@ -54,7 +54,11 @@ export default function App() {
     </AppBar>
   )
 
-  const Container = ({ children }) => <MContainer maxWidth="lg" sx={{ py: 3 }}>{children}</MContainer>
+  const Container = ({ children }) => (
+    <MContainer maxWidth={false} disableGutters sx={{ px: { xs: 2, md: 3 }, py: 3 }}>
+      {children}
+    </MContainer>
+  )
 
   if (route.startsWith('/exercises/')) {
     const id = route.split('/exercises/')[1]

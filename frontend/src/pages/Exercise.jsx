@@ -170,42 +170,56 @@ export default function Exercise({ id }) {
         </Grid>
 
         <Grid item xs={12} md={6}>
-          {meta.starter?.files?.map(f => (
-            <Paper key={f.path} variant="outlined" sx={{ p: 1.5, mb: 2 }}>
-              <Typography variant="caption" sx={{ display: 'block', mb: 0.5, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}>{f.path}</Typography>
-              <Editor
-                height="220px"
-                theme="vs-dark"
-                defaultLanguage={f.path.endsWith('.sol') ? 'plaintext' : 'javascript'}
-                value={edited[f.path] ?? f.content}
-                onChange={(v) => setEdited(prev => ({ ...prev, [f.path]: v ?? '' }))}
-                options={{ minimap: { enabled: false }, fontSize: 14, scrollBeyondLastLine: false }}
-              />
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, height: { xs: 'auto', md: 'calc(100vh - 220px)' } }}>
+            <Paper variant="outlined" sx={{ p: 1.5, flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+              {(() => {
+                const files = (meta.starter?.files || []).filter(f => !/hardhat\.config\.(?:js|cjs|ts)$/i.test(f.path))
+                const single = files.length === 1
+                return (
+                  <Box sx={{ overflow: 'auto', flex: 1 }}>
+                    {files.map((f) => (
+                      <Box key={f.path} sx={{ mb: 2, display: 'flex', flexDirection: 'column', ...(single ? { height: '100%' } : {}) }}>
+                        <Typography variant="caption" sx={{ display: 'block', mb: 0.5, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace' }}>{f.path}</Typography>
+                        <Editor
+                          height={single ? '100%' : '220px'}
+                          theme="vs-dark"
+                          defaultLanguage={f.path.endsWith('.sol') ? 'plaintext' : 'javascript'}
+                          value={edited[f.path] ?? f.content}
+                          onChange={(v) => setEdited(prev => ({ ...prev, [f.path]: v ?? '' }))}
+                          options={{ minimap: { enabled: false }, fontSize: 14, scrollBeyondLastLine: false }}
+                        />
+                      </Box>
+                    ))}
+                  </Box>
+                )
+              })()}
             </Paper>
-          ))}
+
+            <Paper variant="outlined" sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', minHeight: 200 }}>
+              <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
+                <Button size="small" variant="outlined" onClick={() => navigator.clipboard.writeText(log || '')} disabled={!log}>Copy</Button>
+                <Button size="small" variant="text" onClick={() => setLog('')} disabled={!log}>Clear</Button>
+              </Stack>
+              <Box component="pre" sx={{
+                fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace',
+                whiteSpace: 'pre-wrap',
+                m: 0,
+                fontSize: 13,
+                lineHeight: 1.55,
+                overflow: 'auto',
+                p: 1,
+                bgcolor: (t) => (t.palette.mode === 'dark' ? 'grey.900' : 'grey.50'),
+                borderRadius: 1,
+                flex: 1
+              }}>
+                {log || 'Logs will appear here…'}
+              </Box>
+            </Paper>
+          </Box>
         </Grid>
       </Grid>
 
-      <Paper variant="outlined" sx={{ p: 1.5, mt: 2 }}>
-        <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
-          <Button size="small" variant="outlined" onClick={() => navigator.clipboard.writeText(log || '')} disabled={!log}>Copy</Button>
-          <Button size="small" variant="text" onClick={() => setLog('')} disabled={!log}>Clear</Button>
-        </Stack>
-        <Box component="pre" sx={{
-          fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
-          whiteSpace: 'pre-wrap',
-          m: 0,
-          fontSize: 13,
-          lineHeight: 1.55,
-          maxHeight: 340,
-          overflow: 'auto',
-          p: 1,
-          bgcolor: (t) => (t.palette.mode === 'dark' ? 'grey.900' : 'grey.50'),
-          borderRadius: 1
-        }}>
-          {log || 'Logs will appear here…'}
-        </Box>
-      </Paper>
+      
 
       <Snackbar open={snack.open} autoHideDuration={2500} onClose={() => setSnack(s => ({ ...s, open: false }))} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
         <Alert onClose={() => setSnack(s => ({ ...s, open: false }))} severity={snack.severity} sx={{ width: '100%' }}>
