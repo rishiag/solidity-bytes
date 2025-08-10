@@ -1,4 +1,4 @@
-## Soliditybytes — Actionable task checklist (JS-only)
+## Solidity Bytes — Actionable task checklist (JS-only)
 
 Use this checklist to execute the MVP plan. Keep it updated as tasks complete.
 

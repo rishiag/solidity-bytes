@@ -26,7 +26,7 @@ export default function App() {
       <Toolbar>
         <MContainer maxWidth="lg" sx={{ display: 'flex', alignItems: 'center' }}>
           <Typography variant="h6" component="a" href="#/" sx={{ textDecoration: 'none', color: 'inherit', fontWeight: 700 }}>
-            Soliditybytes
+            Solidity Bytes
           </Typography>
           <Stack direction="row" spacing={2} sx={{ ml: 3 }}>
             <MLink href="#/" underline="none">Exercises</MLink>
@@ -54,6 +54,14 @@ export default function App() {
     </AppBar>
   )
 
+  const Footer = () => (
+    <Box component="footer" sx={{ bgcolor: 'primary.main', color: 'primary.contrastText', py: 1.25, mt: 4 }}>
+      <MContainer maxWidth="lg" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Typography variant="caption" sx={{ color: 'inherit' }}>© {new Date().getFullYear()} Solidity Bytes</Typography>
+      </MContainer>
+    </Box>
+  )
+
   const Container = ({ children }) => (
     <MContainer maxWidth={false} disableGutters sx={{ px: { xs: 2, md: 3 }, py: 3 }}>
       {children}
@@ -61,17 +69,24 @@ export default function App() {
   )
 
   if (route.startsWith('/exercises/')) {
-    const id = route.split('/exercises/')[1]
+    // Normalize id to the first segment only (handles paths like "/#/exercises/basic-enum/extra")
+    const id = route.split('/exercises/')[1].split('/')[0]
+    const humanizedId = id
+      .split('-')
+      .filter(Boolean)
+      .map(s => s.charAt(0).toUpperCase() + s.slice(1))
+      .join(' ')
     return (
       <>
         <Helmet>
-          <title>{`${id} — Solidity Exercise | Soliditybytes`}</title>
+          <title>{`${humanizedId} - Solidity Bytes`}</title>
           <link rel="canonical" href={`https://soliditybytes.com/#/exercises/${id}`} />
         </Helmet>
         <Header />
         <Container>
           <Exercise id={id} />
         </Container>
+        <Footer />
       </>
     )
   }
@@ -79,13 +94,14 @@ export default function App() {
     return (
       <>
         <Helmet>
-          <title>Soliditybytes — Learn Solidity with interactive exercises</title>
+          <title>Solidity Bytes - Learn Solidity by Doing</title>
           <link rel="canonical" href={`https://soliditybytes.com/`} />
         </Helmet>
         <Header />
         <Container>
           <Exercises />
         </Container>
+        <Footer />
       </>
     )
   }
@@ -95,6 +111,7 @@ export default function App() {
       <Container>
         <NotFound />
       </Container>
+      <Footer />
     </>
   )
 }

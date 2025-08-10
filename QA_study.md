@@ -1,4 +1,4 @@
-## QA Study Plan for Soliditybytes (Frontend + Backend)
+## QA Study Plan for Solidity Bytes (Frontend + Backend)
 
 This document enumerates the end-to-end test scope, happy paths, edge cases, and likely failure modes. It covers the frontend (Vite + React + Material UI), the backend (Express), the exercise runner (Hardhat subprocess), authentication (Google OAuth), progress storage, and solution gating.
 

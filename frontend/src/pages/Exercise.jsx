@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Paper, Grid, Stack, Button, Chip, Typography, Alert, Box, Snackbar, Breadcrumbs, Link as MLink, LinearProgress } from '@mui/material'
 import Editor from '@monaco-editor/react'
+import NotFound from './NotFound.jsx'
 
 export default function Exercise({ id }) {
   const [meta, setMeta] = useState(null)
@@ -15,10 +16,20 @@ export default function Exercise({ id }) {
   const [snack, setSnack] = useState({ open: false, message: '', severity: 'success' })
 
   useEffect(() => {
+    setError(null)
+    setMeta(null)
     fetch(`/api/exercises/${id}`)
-      .then(r => r.json())
+      .then(async (r) => {
+        if (!r.ok) {
+          if (r.status === 404) throw new Error('not_found')
+          // Try to surface useful message; avoid JSON parse on HTML
+          const text = await r.text().catch(() => '')
+          throw new Error(text || `http_${r.status}`)
+        }
+        return r.json()
+      })
       .then(setMeta)
-      .catch(e => setError(String(e)))
+      .catch((e) => setError(String(e?.message || e)))
   }, [id])
 
   const run = async (mode) => {
@@ -105,6 +116,7 @@ export default function Exercise({ id }) {
     localStorage.setItem(key, JSON.stringify(edited))
   }, [edited, id, meta])
 
+  if (error === 'not_found') return <NotFound />
   if (error) return <Alert severity="error" sx={{ my: 2 }}>{error}</Alert>
   if (!meta) return <Paper variant="outlined" sx={{ p: 2, my: 2 }}>Loading…</Paper>
 

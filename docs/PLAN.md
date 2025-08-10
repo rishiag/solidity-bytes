@@ -1,4 +1,4 @@
-## Soliditybytes — JS-only plan
+## Solidity Bytes — JS-only plan
 
 This document defines the end-to-end plan to ship a Solidity learning MVP with a JavaScript-only stack.
 

@@ -1,4 +1,4 @@
-## Authoring Style Guide — Soliditybytes
+## Authoring Style Guide — Solidity Bytes
 
 This guide defines how to write exercises that are clear, consistent, and auto-gradable.
 

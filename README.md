@@ -1,4 +1,4 @@
-## Soliditybytes
+## Solidity Bytes
 
 Mission: Help developers learn Solidity quickly through hands-on, zero-setup exercises that run against a real local blockchain. Entire stack will be JavaScript-only.
 
