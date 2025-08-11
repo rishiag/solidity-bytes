@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import { Helmet } from 'react-helmet'
-import { AppBar, Toolbar, Container as MContainer, Typography, Button, Link as MLink, Box, Stack, Avatar } from '@mui/material'
+import { AppBar, Toolbar, Container as MContainer, Typography, Button, Link as MLink, Box, Stack, Avatar, Menu, MenuItem } from '@mui/material'
 import Exercises from './Exercises.jsx'
 import Exercise from './Exercise.jsx'
 import NotFound from './NotFound.jsx'
@@ -30,7 +30,22 @@ export default function App() {
           </Typography>
           <Stack direction="row" spacing={2} sx={{ ml: 3 }}>
             <MLink href="#/" underline="none">Exercises</MLink>
-            <MLink href="https://soliditylang.org/" underline="none" target="_blank" rel="noreferrer">Docs</MLink>
+            {(() => {
+              const [anchorEl, setAnchorEl] = React.useState(null)
+              const open = Boolean(anchorEl)
+              const handleOpen = (e) => setAnchorEl(e.currentTarget)
+              const handleClose = () => setAnchorEl(null)
+              return (
+                <>
+                  <Button size="small" onClick={handleOpen}>Get Help</Button>
+                  <Menu anchorEl={anchorEl} open={open} onClose={handleClose} keepMounted>
+                    <MenuItem component="a" href="https://soliditylang.org/" target="_blank" rel="noreferrer" onClick={handleClose}>
+                      Solidity Docs
+                    </MenuItem>
+                  </Menu>
+                </>
+              )
+            })()}
           </Stack>
           <Box sx={{ ml: 'auto', display: 'flex', alignItems: 'center', gap: 1.5 }}>
             {user ? (
