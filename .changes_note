@@ -1,0 +1,3 @@
+Server updated to scan exercises recursively under exercises/.
+Runner updated to find YAMLs recursively under exercises/.
+Next step: create per-category folders and move/remove old track folders.

@@ -55,29 +55,32 @@ function writeProgress(obj) {
   fs.writeFileSync(progressFile, JSON.stringify(obj, null, 2));
 }
 
-function listExercisesDir(dir) {
-  if (!fs.existsSync(dir)) return [];
-  return fs
-    .readdirSync(dir)
-    .filter((f) => f.endsWith('.yaml'))
-    .map((f) => path.join(dir, f));
+function listYamlFilesRecursively(rootDir) {
+  const out = [];
+  const stack = [rootDir];
+  while (stack.length) {
+    const dir = stack.pop();
+    if (!fs.existsSync(dir)) continue;
+    const entries = fs.readdirSync(dir, { withFileTypes: true });
+    for (const e of entries) {
+      const p = path.join(dir, e.name);
+      if (e.isDirectory()) stack.push(p);
+      else if (e.isFile() && e.name.endsWith('.yaml')) out.push(p);
+    }
+  }
+  return out;
 }
 function readExerciseDoc(p) {
   const txt = fs.readFileSync(p, 'utf8');
   return YAML.parse(txt);
 }
 function findExerciseById(exerciseId) {
-  const roots = [
-    path.join(process.cwd(), 'exercises', 'track-a-basics'),
-    path.join(process.cwd(), 'exercises', '_examples'),
-  ];
-  for (const r of roots) {
-    for (const p of listExercisesDir(r)) {
-      try {
-        const doc = readExerciseDoc(p);
-        if (doc?.id === exerciseId) return doc;
-      } catch {}
-    }
+  const root = path.join(process.cwd(), 'exercises');
+  for (const p of listYamlFilesRecursively(root)) {
+    try {
+      const doc = readExerciseDoc(p);
+      if (doc?.id === exerciseId) return doc;
+    } catch {}
   }
   return null;
 }
@@ -138,12 +141,12 @@ app.get('/health', (_req, res) => res.json({ ok: true }));
 // Basic sitemap.xml (list exercises and core pages)
 app.get('/sitemap.xml', (_req, res) => {
   const base = process.env.PUBLIC_BASE_URL || 'http://localhost:3000';
-  const dir = path.join(process.cwd(), 'exercises', 'track-a-basics');
+  const dir = path.join(process.cwd(), 'exercises');
   const urls = [
     `${base}/`,
     `${base}/#/`,
   ];
-  for (const p of listExercisesDir(dir)) {
+  for (const p of listYamlFilesRecursively(dir)) {
     try {
       const d = readExerciseDoc(p);
       if (d?.id) urls.push(`${base}/#/exercises/${d.id}`);
@@ -157,10 +160,10 @@ app.get('/sitemap.xml', (_req, res) => {
 });
 
 app.get('/exercises', (_req, res) => {
-  const dir = path.join(process.cwd(), 'exercises', 'track-a-basics');
-  const items = listExercisesDir(dir).map((p) => {
+  const dir = path.join(process.cwd(), 'exercises');
+  const items = listYamlFilesRecursively(dir).map((p) => {
     const d = readExerciseDoc(p);
-    return { id: d.id, title: d.title, difficulty: d.difficulty, tags: d.tags || [] };
+    return { id: d.id, title: d.title, difficulty: d.difficulty, tags: d.tags || [], category: d.category || null };
   });
   res.json(items);
 });
@@ -171,6 +174,7 @@ app.get('/exercises/:id', (req, res) => {
   const safe = {
     id: doc.id,
     title: doc.title,
+    category: doc.category || null,
     difficulty: doc.difficulty,
     tags: doc.tags || [],
     objectives: doc.objectives || [],
@@ -179,6 +183,7 @@ app.get('/exercises/:id', (req, res) => {
     starter: doc.starter || { files: [] },
     tests: { files: (doc.tests?.files || []).map((f) => ({ path: f.path })) },
     visibility: doc.visibility || 'after-pass',
+    explanation: doc.explanation || ''
   };
   res.json(safe);
 });

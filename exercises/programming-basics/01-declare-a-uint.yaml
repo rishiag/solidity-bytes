@@ -1,0 +1,60 @@
+id: declare-a-uint
+title: Declare a uint
+category: programming-basics
+difficulty: beginner
+tags: [variables, basics, state]
+objectives:
+  - Declare a public state variable named age of type uint
+description: |
+  Declare a state variable inside the `Problem` contract. Create a `public`
+  unsigned integer (`uint`) named `age`.
+hints:
+  - "Remember the syntax: <type> <visibility> <name>;"
+  - State variables live in contract storage and default to zero when uninitialized.
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: declare a public unsigned integer named `age`
+            // Write your code below this line. Example form:
+            // <type> <visibility> <name>;
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("exposes age() getter and defaults to 0", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            // public state variable => auto-generated getter `age()`
+            expect(await c.age()).to.equal(0n);
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            uint public age;
+        }
+explanation: |
+  Declares a public unsigned integer `age`. `uint` is an alias for `uint256`.
+  Marking it `public` generates a getter `age()` that returns the default
+  value `0` until changed.
+visibility: after-pass
+

@@ -28,20 +28,21 @@ function parseArgs() {
 }
 
 function findExerciseYaml(exerciseId) {
-  const searchDirs = [
-    path.join(process.cwd(), 'exercises', '_examples'),
-    path.join(process.cwd(), 'exercises', 'track-a-basics')
-  ];
-  for (const dir of searchDirs) {
+  const root = path.join(process.cwd(), 'exercises');
+  const stack = [root];
+  while (stack.length) {
+    const dir = stack.pop();
     if (!fs.existsSync(dir)) continue;
-    for (const f of fs.readdirSync(dir)) {
-      if (!f.endsWith('.yaml')) continue;
-      const p = path.join(dir, f);
-      try {
-        const txt = fs.readFileSync(p, 'utf8');
-        const doc = YAML.parse(txt);
-        if (doc?.id === exerciseId) return { path: p, doc };
-      } catch {}
+    for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
+      const p = path.join(dir, ent.name);
+      if (ent.isDirectory()) stack.push(p);
+      else if (ent.isFile() && ent.name.endsWith('.yaml')) {
+        try {
+          const txt = fs.readFileSync(p, 'utf8');
+          const doc = YAML.parse(txt);
+          if (doc?.id === exerciseId) return { path: p, doc };
+        } catch {}
+      }
     }
   }
   die(`Exercise not found: ${exerciseId}`);

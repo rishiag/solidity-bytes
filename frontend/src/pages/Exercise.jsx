@@ -128,8 +128,7 @@ export default function Exercise({ id }) {
       </Breadcrumbs>
       <Paper variant="outlined" sx={{ position: 'sticky', top: 64, zIndex: 5, p: 1.5, mb: 2, display: 'flex', alignItems: 'center', gap: 1.5 }}>
         <Chip size="small" label={id} variant="outlined" />
-        <Button size="small" variant="contained" onClick={() => run('starter')} disabled={running}>Run (starter)</Button>
-        <Button size="small" variant="outlined" onClick={() => run('solution')} disabled={running}>Run (solution)</Button>
+        <Button size="small" variant="contained" onClick={() => run('starter')} disabled={running}>Run Code</Button>
         {exitCode !== null && (
           <Chip color={exitCode === 0 ? 'success' : 'error'} label={exitCode === 0 ? 'Passed' : 'Failed'} size="small" sx={{ ml: 1 }} />
         )}
@@ -149,7 +148,7 @@ export default function Exercise({ id }) {
 
       <Grid container spacing={2}>
         <Grid item xs={12} md={6}>
-          <Paper variant="outlined" sx={{ p: 2 }}>
+          <Paper variant="outlined" sx={{ p: 2, height: { xs: 'auto', md: 'calc(100dvh - 220px)' } }}>
             <Typography variant="h6" sx={{ mt: 0 }}>{meta.title}</Typography>
             <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
               [{meta.difficulty}] {meta.tags?.join(', ')}
@@ -182,15 +181,15 @@ export default function Exercise({ id }) {
         </Grid>
 
         <Grid item xs={12} md={6}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, height: { xs: 'auto', md: 'calc(100vh - 220px)' } }}>
-            <Paper variant="outlined" sx={{ p: 1.5, flex: 1, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, height: { xs: 'auto', md: 'calc(100dvh - 220px)' }, width: '100%', flex: 1, minHeight: 0, pl: 2, borderLeft: 1, borderColor: 'divider' }}>
+            <Paper variant="outlined" sx={{ p: 1.5, flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', width: '100%' }}>
               {(() => {
                 const files = (meta.starter?.files || []).filter(f => !/hardhat\.config\.(?:js|cjs|ts)$/i.test(f.path))
                 const single = files.length === 1
                 return (
-                  <Box sx={{ overflow: 'auto', flex: 1 }}>
+                  <Box sx={{ overflow: 'auto', flex: 1, width: '100%' }}>
                     {files.map((f) => (
-                      <Box key={f.path} sx={{ mb: 2, display: 'flex', flexDirection: 'column', ...(single ? { height: '100%' } : {}) }}>
+                      <Box key={f.path} sx={{ mb: 2, display: 'flex', flexDirection: 'column', width: '100%', ...(single ? { height: '100%' } : {}) }}>
                         <Typography variant="caption" sx={{ display: 'block', mb: 0.5, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace' }}>{f.path}</Typography>
                         <Editor
                           height={single ? '100%' : '220px'}
@@ -198,7 +197,7 @@ export default function Exercise({ id }) {
                           defaultLanguage={f.path.endsWith('.sol') ? 'plaintext' : 'javascript'}
                           value={edited[f.path] ?? f.content}
                           onChange={(v) => setEdited(prev => ({ ...prev, [f.path]: v ?? '' }))}
-                          options={{ minimap: { enabled: false }, fontSize: 14, scrollBeyondLastLine: false }}
+                          options={{ minimap: { enabled: false }, fontSize: 14, scrollBeyondLastLine: false, automaticLayout: true }}
                         />
                       </Box>
                     ))}
@@ -207,7 +206,7 @@ export default function Exercise({ id }) {
               })()}
             </Paper>
 
-            <Paper variant="outlined" sx={{ p: 1.5, flex: 1, display: 'flex', flexDirection: 'column', minHeight: 200 }}>
+            <Paper variant="outlined" sx={{ p: 1.5, flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', width: '100%' }}>
               <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
                 <Button size="small" variant="outlined" onClick={() => navigator.clipboard.writeText(log || '')} disabled={!log}>Copy</Button>
                 <Button size="small" variant="text" onClick={() => setLog('')} disabled={!log}>Clear</Button>
@@ -222,7 +221,8 @@ export default function Exercise({ id }) {
                 p: 1,
                 bgcolor: (t) => (t.palette.mode === 'dark' ? 'grey.900' : 'grey.50'),
                 borderRadius: 1,
-                flex: 1
+                flex: 1,
+                width: '100%'
               }}>
                 {log || 'Logs will appear here…'}
               </Box>

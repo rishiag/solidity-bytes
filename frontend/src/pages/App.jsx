@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { Helmet } from 'react-helmet'
 import { AppBar, Toolbar, Container as MContainer, Typography, Button, Link as MLink, Box, Stack, Avatar, Menu, MenuItem } from '@mui/material'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import Exercises from './Exercises.jsx'
 import Exercise from './Exercise.jsx'
 import NotFound from './NotFound.jsx'
@@ -28,8 +29,11 @@ export default function App() {
           <Typography variant="h6" component="a" href="#/" sx={{ textDecoration: 'none', color: 'inherit', fontWeight: 700 }}>
             Solidity Bytes
           </Typography>
-          <Stack direction="row" spacing={2} sx={{ ml: 3 }}>
-            <MLink href="#/" underline="none">Exercises</MLink>
+          <Stack direction="row" spacing={2} sx={{ ml: 3, alignItems: 'center' }}>
+            <MLink href="#/" underline="none" sx={{
+              display: 'inline-flex', alignItems: 'center', fontSize: 14, color: 'text.primary',
+              '&:hover': { color: 'primary.main', textDecoration: 'none' }
+            }}>Exercises</MLink>
             {(() => {
               const [anchorEl, setAnchorEl] = React.useState(null)
               const open = Boolean(anchorEl)
@@ -37,7 +41,10 @@ export default function App() {
               const handleClose = () => setAnchorEl(null)
               return (
                 <>
-                  <Button size="small" onClick={handleOpen}>Get Help</Button>
+                  <Button size="small" onClick={handleOpen} endIcon={<ExpandMoreIcon fontSize="small" />} sx={{
+                    fontSize: 14, textTransform: 'none', color: 'text.primary',
+                    '&:hover': { backgroundColor: 'action.hover' }
+                  }}>Get Help</Button>
                   <Menu anchorEl={anchorEl} open={open} onClose={handleClose} keepMounted>
                     <MenuItem component="a" href="https://soliditylang.org/" target="_blank" rel="noreferrer" onClick={handleClose}>
                       Solidity Docs
@@ -70,7 +77,7 @@ export default function App() {
   )
 
   const Footer = () => (
-    <Box component="footer" sx={{ bgcolor: 'primary.main', color: 'primary.contrastText', py: 1.25, mt: 4 }}>
+    <Box component="footer" sx={{ bgcolor: 'primary.main', color: 'primary.contrastText', py: 1.25, mt: 'auto' }}>
       <MContainer maxWidth="lg" sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Typography variant="caption" sx={{ color: 'inherit' }}>© {new Date().getFullYear()} Solidity Bytes</Typography>
       </MContainer>
@@ -92,7 +99,7 @@ export default function App() {
       .map(s => s.charAt(0).toUpperCase() + s.slice(1))
       .join(' ')
     return (
-      <>
+      <Box sx={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}>
         <Helmet>
           <title>{`${humanizedId} - Solidity Bytes`}</title>
           <link rel="canonical" href={`https://soliditybytes.com/#/exercises/${id}`} />
@@ -102,12 +109,12 @@ export default function App() {
           <Exercise id={id} />
         </Container>
         <Footer />
-      </>
+      </Box>
     )
   }
   if (route === '/' || route === '') {
     return (
-      <>
+      <Box sx={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}>
         <Helmet>
           <title>Solidity Bytes - Learn Solidity by Doing</title>
           <link rel="canonical" href={`https://soliditybytes.com/`} />
@@ -117,17 +124,17 @@ export default function App() {
           <Exercises />
         </Container>
         <Footer />
-      </>
+      </Box>
     )
   }
   return (
-    <>
+    <Box sx={{ minHeight: '100dvh', display: 'flex', flexDirection: 'column' }}>
       <Header />
       <Container>
         <NotFound />
       </Container>
       <Footer />
-    </>
+    </Box>
   )
 }
 
