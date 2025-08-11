@@ -1,0 +1,59 @@
+id: custom-errors-with-revert
+title: Custom Errors with revert
+category: ethereum-basics
+difficulty: beginner
+tags: [errors, revert, custom-errors]
+objectives:
+  - Define a custom error and revert with that error if an input is invalid
+description: |
+  Inside the `Problem` contract, define `error InvalidInput();` and write a function `check(uint x)` that
+  reverts with `InvalidInput()` if `x` is zero; otherwise returns `true`.
+hints:
+  - "Define at contract scope: error InvalidInput();"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: error InvalidInput(); function check(uint x) public pure returns (bool)
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("reverts with custom error on zero", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            await expect(c.check(0)).to.be.revertedWithCustomError(c, 'InvalidInput');
+            expect(await c.check(1)).to.equal(true);
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            error InvalidInput();
+            function check(uint x) public pure returns (bool) {
+                if (x == 0) revert InvalidInput();
+                return true;
+            }
+        }
+explanation: |
+  Custom errors are cheaper than string reverts and provide a distinct selector; tested via `revertedWithCustomError`.
+visibility: after-pass
+

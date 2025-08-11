@@ -1,0 +1,56 @@
+id: equality-check
+title: Equality Check
+category: programming-basics
+difficulty: beginner
+tags: [functions, pure, comparisons]
+objectives:
+  - Write a pure function that returns true if two uint inputs are equal
+description: |
+  Inside the `Problem` contract, write a `pure` function `eq(uint a, uint b)` that returns `true` when `a == b`.
+hints:
+  - "Return a == b"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: pure function eq(uint a, uint b) returns (bool)
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("returns true if equal", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            expect(await c.eq(7, 7)).to.equal(true);
+            expect(await c.eq(7, 8)).to.equal(false);
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            function eq(uint a, uint b) public pure returns (bool) {
+                return a == b;
+            }
+        }
+explanation: |
+  Returns the boolean result of the equality comparison.
+visibility: after-pass
+

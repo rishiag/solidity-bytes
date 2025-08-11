@@ -126,26 +126,7 @@ export default function Exercise({ id }) {
         <Typography color="text.secondary" noWrap maxWidth={480}>{meta.title}</Typography>
       </Breadcrumbs>
 
-      <Paper variant="outlined" sx={{ position: 'sticky', top: 64, zIndex: 5, p: 1.5, mb: 2, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-        {/** Temporarily hide exercise id label */}
-        {/** <Chip size="small" label={id} variant="outlined" /> */}
-        <Button size="small" variant="contained" onClick={() => run('starter')} disabled={running}>Run Code</Button>
-        {exitCode !== null && (
-          <Chip color={exitCode === 0 ? 'success' : 'error'} label={exitCode === 0 ? 'Passed' : 'Failed'} size="small" sx={{ ml: 1 }} />
-        )}
-        {summary && (
-          <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
-            {summary.passing} passed{typeof summary.failing === 'number' ? `, ${summary.failing} failed` : ''}
-          </Typography>
-        )}
-        <Button size="small" href={`#/`} sx={{ ml: 'auto' }}>Back to list</Button>
-        {/** Solution button moved next to Show hints below */}
-        {running && (
-          <Box sx={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>
-            <LinearProgress />
-          </Box>
-        )}
-      </Paper>
+      {/** removed sticky action bar per request */}
 
       {/* ---- LAYOUT: MUI Grid, no wrap on md+; right side grows to fill ---- */}
       <Grid
@@ -290,12 +271,15 @@ export default function Exercise({ id }) {
                 minWidth: 0,
               }}
             >
+              {running && (
+                <LinearProgress sx={{ position: 'sticky', top: 0, left: 0, right: 0, mb: 1 }} />
+              )}
               {(() => {
                 const files = (meta.starter?.files || []).filter(f => !/hardhat\.config\.(?:js|cjs|ts)$/i.test(f.path))
                 const single = files.length === 1
                 return (
                   <Box sx={{ overflow: 'auto', flex: 1, width: '100%', minWidth: 0 }}>
-                    {files.map((f) => (
+                    {files.map((f, i) => (
                       <Box
                         key={f.path}
                         sx={{
@@ -307,17 +291,31 @@ export default function Exercise({ id }) {
                           ...(single ? { height: '100%' } : {}),
                         }}
                       >
-                        <Typography
-                          variant="caption"
-                          sx={{
-                            display: 'block',
-                            mb: 0.5,
-                            fontFamily:
-                              'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
-                          }}
-                        >
-                          {f.path}
-                        </Typography>
+                        <Stack direction="row" alignItems="center" justifyContent="space-between" sx={{ mb: 0.5 }}>
+                          <Typography
+                            variant="caption"
+                            sx={{
+                              display: 'block',
+                              fontFamily:
+                                'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+                            }}
+                          >
+                            {f.path}
+                          </Typography>
+                          {i === 0 && (
+                            <Stack direction="row" spacing={1} alignItems="center">
+                              {exitCode !== null && (
+                                <Chip color={exitCode === 0 ? 'success' : 'error'} label={exitCode === 0 ? 'Passed' : 'Failed'} size="small" />
+                              )}
+                              {summary && (
+                                <Typography variant="caption" color="text.secondary">
+                                  {summary.passing} passed{typeof summary.failing === 'number' ? `, ${summary.failing} failed` : ''}
+                                </Typography>
+                              )}
+                              <Button size="small" variant="contained" onClick={() => run('starter')} disabled={running}>Run Code</Button>
+                            </Stack>
+                          )}
+                        </Stack>
                         <Editor
                           height={single ? '100%' : '220px'}
                           theme="vs-dark"

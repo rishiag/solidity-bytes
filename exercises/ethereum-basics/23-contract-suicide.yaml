@@ -1,0 +1,60 @@
+id: contract-suicide
+title: Contract Suicide (selfdestruct)
+category: ethereum-basics
+difficulty: beginner
+tags: [destruct, ownership]
+objectives:
+  - Write a function callable only by the owner that destroys the contract and sends funds to the owner
+description: |
+  Implement an `owner` set in the constructor. Add `destroy()` restricted by `onlyOwner` that calls
+  `selfdestruct(payable(owner));`.
+hints:
+  - "Use a modifier onlyOwner"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: owner pattern and function destroy() public onlyOwner
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("only owner can selfdestruct", async function () {
+            const [owner, other] = await ethers.getSigners();
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.connect(owner).deploy();
+            await expect(c.connect(other).destroy()).to.be.reverted;
+            // owner call may revert in newer EVMs where selfdestruct semantics changed; ensure call is attempted
+            await expect(c.connect(owner).destroy()).to.not.be.reverted;
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            address public owner;
+            constructor(){ owner = msg.sender; }
+            modifier onlyOwner(){ require(msg.sender==owner, 'not owner'); _; }
+            function destroy() public onlyOwner { selfdestruct(payable(owner)); }
+        }
+explanation: |
+  Demonstrates `selfdestruct`. Note: behavior may differ across forks/EIPs; use for teaching only.
+visibility: after-pass
+

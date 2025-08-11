@@ -1,0 +1,60 @@
+id: internal-function
+title: internal Function
+category: ethereum-basics
+difficulty: beginner
+tags: [visibility, inheritance]
+objectives:
+  - Demonstrate an internal function, callable by the contract and its children
+description: |
+  Define an `internal` function `twice(uint x)` that returns `x * 2`. Create a child contract `Child`
+  that inherits `Problem` and exposes a public wrapper `callTwice(uint x)` which returns `twice(x)`.
+hints:
+  - "internal members are visible in the contract and its children via inheritance"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: function twice(uint x) internal pure returns (uint) { return x * 2; }
+        }
+        contract Child is Problem {
+            // Goal: function callTwice(uint x) public pure returns (uint)
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("internal function usable from child", async function () {
+            const Factory = await ethers.getContractFactory("Child");
+            const c = await Factory.deploy();
+            expect(await c.callTwice(6)).to.equal(12n);
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            function twice(uint x) internal pure returns (uint) { return x * 2; }
+        }
+        contract Child is Problem {
+            function callTwice(uint x) public pure returns (uint) { return twice(x); }
+        }
+explanation: |
+  `internal` permits access within the contract and derived contracts; here the child calls the parent's internal function.
+visibility: after-pass
+

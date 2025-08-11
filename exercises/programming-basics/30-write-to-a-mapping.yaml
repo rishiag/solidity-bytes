@@ -1,0 +1,59 @@
+id: write-to-a-mapping
+title: Write to a Mapping
+category: programming-basics
+difficulty: beginner
+tags: [mappings, state]
+objectives:
+  - Create a function that takes an address and uint to update the balances mapping
+description: |
+  Inside the `Problem` contract, declare `mapping(address => uint) public balances;` and write
+  a function `set(address a, uint amount)` that sets `balances[a] = amount`.
+hints:
+  - "Use balances[key] = value;"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: balances mapping and set(address a, uint amount)
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("writes to mapping", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            const [a] = await ethers.getSigners();
+            await (await c.set(a.address, 123)).wait();
+            expect(await c.balances(a.address)).to.equal(123n);
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            mapping(address => uint) public balances;
+            function set(address a, uint amount) public {
+                balances[a] = amount;
+            }
+        }
+explanation: |
+  Shows how to write to a mapping by indexing with a key and assigning a value.
+visibility: after-pass
+

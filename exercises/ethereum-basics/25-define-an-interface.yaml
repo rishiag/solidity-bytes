@@ -1,0 +1,52 @@
+id: define-an-interface
+title: Define an Interface
+category: ethereum-basics
+difficulty: beginner
+tags: [interfaces]
+objectives:
+  - Define an interface for a simple contract that has a getValue() function
+description: |
+  Define `interface ITarget { function getValue() external view returns (uint); }`.
+hints:
+  - "Interfaces contain function signatures only"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: define interface ITarget with getValue() external view returns (uint)
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("defines interface (compile-time)", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            expect(typeof c.address).to.equal('string');
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        interface ITarget { function getValue() external view returns (uint); }
+        contract Problem {}
+explanation: |
+  Declares a minimal interface with a single external view function.
+visibility: after-pass
+

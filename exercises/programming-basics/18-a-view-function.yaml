@@ -1,0 +1,57 @@
+id: a-view-function
+title: A view Function
+category: programming-basics
+difficulty: beginner
+tags: [functions, view, state]
+objectives:
+  - Write a view function that reads and returns the value of a public state variable
+description: |
+  Inside the `Problem` contract, declare a `uint public value;` and write a `view` function
+  `get()` that returns the current `value`.
+hints:
+  - "Public variables already have auto-getters; implement get() to practice view"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: declare `uint public value;` and add `function get() public view returns (uint)`
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("reads via view getter", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            expect(await c.get()).to.equal(0n);
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            uint public value;
+            function get() public view returns (uint) {
+                return value;
+            }
+        }
+explanation: |
+  A `view` function reads state without modifying it. Here it returns the value of a state variable.
+visibility: after-pass
+

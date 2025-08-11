@@ -1,0 +1,56 @@
+id: who-am-i
+title: Who Am I?
+category: ethereum-basics
+difficulty: beginner
+tags: [msg.sender, context]
+objectives:
+  - Write a function that returns the address of the caller (msg.sender)
+description: |
+  Inside the `Problem` contract, write a function `who()` that returns `msg.sender`.
+hints:
+  - "Return the special context variable `msg.sender`"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: function who() public view returns (address)
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("returns caller address", async function () {
+            const [a] = await ethers.getSigners();
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            expect(await c.connect(a).who()).to.equal(a.address);
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            function who() public view returns (address) {
+                return msg.sender;
+            }
+        }
+explanation: |
+  Uses the global `msg.sender` to return the caller's address.
+visibility: after-pass
+

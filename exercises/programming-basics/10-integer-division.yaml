@@ -1,0 +1,56 @@
+id: integer-division
+title: Integer Division
+category: programming-basics
+difficulty: beginner
+tags: [functions, pure, arithmetic]
+objectives:
+  - Write a pure function to divide 10 by 3 and return the uint result
+description: |
+  Inside the `Problem` contract, write a `pure` function `quot()` that returns the integer result of
+  dividing `10` by `3` (`uint` division truncates the decimal part).
+hints:
+  - "In Solidity, uint division truncates toward zero"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: pure function quot() returns (uint) -> 10 / 3
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("returns 10 / 3 as uint (truncated)", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            expect(await c.quot()).to.equal(3n);
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            function quot() public pure returns (uint) {
+                return 10 / 3;
+            }
+        }
+explanation: |
+  Integer division with `uint` truncates the fractional part. `10 / 3` evaluates to `3`.
+visibility: after-pass
+

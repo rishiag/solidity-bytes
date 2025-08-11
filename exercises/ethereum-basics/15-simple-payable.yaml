@@ -1,0 +1,53 @@
+id: simple-payable
+title: Simple payable Function
+category: ethereum-basics
+difficulty: beginner
+tags: [payable]
+objectives:
+  - Write a payable function that accepts Ether
+description: |
+  Implement `deposit()` as a `public payable` function that accepts Ether and does nothing else.
+hints:
+  - "Mark the function as payable"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: function deposit() public payable {}
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("accepts ether", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            await expect(c.deposit({ value: ethers.parseEther("1") })).to.not.be.reverted;
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            function deposit() public payable {}
+        }
+explanation: |
+  A minimal payable function that accepts ETH transfers.
+visibility: after-pass
+

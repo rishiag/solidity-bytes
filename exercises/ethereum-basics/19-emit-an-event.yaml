@@ -1,0 +1,61 @@
+id: emit-an-event
+title: Emit an Event
+category: ethereum-basics
+difficulty: beginner
+tags: [events, payable]
+objectives:
+  - Write a payable function that emits the PaymentReceived event with the sender and value
+description: |
+  Declare `event PaymentReceived(address from, uint amount);` and implement `receivePayment()` as a
+  `public payable` function that emits `PaymentReceived(msg.sender, msg.value)`.
+hints:
+  - "Emit the event after receiving ETH"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: event PaymentReceived(address from, uint amount);
+            // and function receivePayment() public payable { emit PaymentReceived(msg.sender, msg.value); }
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("emits PaymentReceived on payment", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            const value = ethers.parseEther("0.1");
+            await expect(c.receivePayment({ value }))
+              .to.emit(c, 'PaymentReceived')
+              .withArgs(await ethers.getSigner().then(s=>s.address).catch(async()=> (await ethers.getSigners())[0].address), value);
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            event PaymentReceived(address from, uint amount);
+            function receivePayment() public payable {
+                emit PaymentReceived(msg.sender, msg.value);
+            }
+        }
+explanation: |
+  Emits an event recording who paid and how much ETH was received.
+visibility: after-pass
+

@@ -1,0 +1,61 @@
+id: read-from-array
+title: Read from Array
+category: programming-basics
+difficulty: beginner
+tags: [arrays, view]
+objectives:
+  - Create a function that returns the element at a specific index of an array
+description: |
+  Inside the `Problem` contract, declare `uint[] public items;` and write a `view` function
+  `get(uint i)` that returns `items[i]`.
+hints:
+  - "Use the index operator on dynamic arrays: items[i]"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: `uint[] public items;` and `function get(uint i) public view returns (uint)`
+            // Helper (optional): a push function to seed data for tests
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("reads element at index", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            // seed two values
+            await (await c.push(11)).wait();
+            await (await c.push(22)).wait();
+            expect(await c.get(0)).to.equal(11n);
+            expect(await c.get(1)).to.equal(22n);
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            uint[] public items;
+            function push(uint x) public { items.push(x); }
+            function get(uint i) public view returns (uint) { return items[i]; }
+        }
+explanation: |
+  Demonstrates indexed reads from a dynamic array using `items[i]`.
+visibility: after-pass
+

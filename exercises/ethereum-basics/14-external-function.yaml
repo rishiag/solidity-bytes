@@ -1,0 +1,56 @@
+id: external-function
+title: external Function
+category: ethereum-basics
+difficulty: beginner
+tags: [visibility]
+objectives:
+  - Demonstrate an external function, only callable from outside the contract
+description: |
+  Write an `external` function `extPing()` that returns `"pong"`. Add a public function `callExt()` that
+  calls `this.extPing()` to demonstrate external call semantics.
+hints:
+  - "external functions cannot be called internally without `this.`"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: external function extPing() returns (string memory) and public callExt()
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("external function and internal delegate call", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            expect(await c.extPing()).to.equal("pong");
+            expect(await c.callExt()).to.equal("pong");
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            function extPing() external pure returns (string memory) { return "pong"; }
+            function callExt() public view returns (string memory) { return this.extPing(); }
+        }
+explanation: |
+  `external` functions are meant for external calls; calling from within the contract requires `this.` which performs an external call.
+visibility: after-pass
+

@@ -1,0 +1,57 @@
+id: hashing-with-keccak256
+title: Hashing with keccak256
+category: ethereum-basics
+difficulty: beginner
+tags: [hashing, keccak256]
+objectives:
+  - Create a function that takes a uint and returns its keccak256 hash
+description: |
+  Implement `hashOf(uint x)` that returns `keccak256(abi.encodePacked(x))`.
+hints:
+  - "Use abi.encodePacked to create bytes for hashing"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: function hashOf(uint x) public pure returns (bytes32)
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("returns keccak256 hash", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            const h = await c.hashOf(7);
+            const expected = ethers.keccak256(ethers.AbiCoder.defaultAbiCoder().encode(["uint256"],[7]));
+            expect(h).to.equal(expected);
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            function hashOf(uint x) public pure returns (bytes32) {
+                return keccak256(abi.encodePacked(x));
+            }
+        }
+explanation: |
+  Uses `keccak256` over ABI-packed encoding of the input.
+visibility: after-pass
+

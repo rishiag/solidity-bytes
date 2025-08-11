@@ -1,0 +1,55 @@
+id: receive-function
+title: The receive Function
+category: ethereum-basics
+difficulty: beginner
+tags: [payable, receive]
+objectives:
+  - Implement the special receive() function to handle plain Ether transfers
+description: |
+  Implement `receive() external payable {}` so the contract can accept plain ETH transfers with empty data.
+hints:
+  - "`receive()` has no name and no arguments; must be external payable"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: implement receive() external payable {}
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("accepts plain ETH via receive", async function () {
+            const [a] = await ethers.getSigners();
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            await expect(a.sendTransaction({ to: c.target, value: ethers.parseEther("0.05") })).to.not.be.reverted;
+            expect(await ethers.provider.getBalance(c.target)).to.equal(ethers.parseEther("0.05"));
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            receive() external payable {}
+        }
+explanation: |
+  The `receive()` function is executed on plain ETH transfers with empty calldata; marking it payable allows accepting funds.
+visibility: after-pass
+

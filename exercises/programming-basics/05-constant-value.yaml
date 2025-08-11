@@ -1,0 +1,58 @@
+id: constant-value
+title: Constant Value
+category: programming-basics
+difficulty: beginner
+tags: [constants, variables, state]
+objectives:
+  - Declare a public constant named SECONDS_IN_A_DAY
+description: |
+  Inside the `Problem` contract, declare a `public` `constant` unsigned integer named
+  `SECONDS_IN_A_DAY` with the correct value.
+hints:
+  - "Use uppercase for constants; example: uint public constant NAME = 123;"
+  - "There are 24 * 60 * 60 seconds in a day"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: declare a public constant uint named `SECONDS_IN_A_DAY`
+            // Write your code below this line.
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("exposes SECONDS_IN_A_DAY constant with expected value", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            // 24 hours * 60 minutes * 60 seconds
+            expect(await c.SECONDS_IN_A_DAY()).to.equal(24n * 60n * 60n);
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            uint public constant SECONDS_IN_A_DAY = 24 * 60 * 60;
+        }
+explanation: |
+  Declares a `public constant` `uint` with the value for one day in seconds.
+  Solidity inlines constants; marking it `public` provides a getter that returns the value.
+visibility: after-pass
+

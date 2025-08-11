@@ -1,0 +1,54 @@
+id: declare-an-array
+title: Declare an Array
+category: programming-basics
+difficulty: beginner
+tags: [arrays, state]
+objectives:
+  - Declare a public state variable that is a dynamic array of uints
+description: |
+  Inside the `Problem` contract, declare `uint[] public items;` as a dynamic array of unsigned integers.
+hints:
+  - "Dynamic uint array: uint[] public name;"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: declare `uint[] public items;`
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("declares a public uint[]", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            // default length is 0
+            expect(await c.items.length).to.equal(0);
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            uint[] public items;
+        }
+explanation: |
+  Declares a dynamic array `uint[]` with public visibility which generates an indexer-like getter.
+visibility: after-pass
+

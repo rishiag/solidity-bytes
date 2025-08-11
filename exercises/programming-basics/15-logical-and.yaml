@@ -1,0 +1,58 @@
+id: logical-and
+title: Logical AND
+category: programming-basics
+difficulty: beginner
+tags: [functions, pure, logic]
+objectives:
+  - Write a pure function that takes two bools and returns true only if both are true
+description: |
+  Inside the `Problem` contract, write a `pure` function `both(bool x, bool y)` that returns `x && y`.
+hints:
+  - "Use logical AND: x && y"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: pure function both(bool x, bool y) returns (bool)
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("returns true only when both are true", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            expect(await c.both(true, true)).to.equal(true);
+            expect(await c.both(true, false)).to.equal(false);
+            expect(await c.both(false, true)).to.equal(false);
+            expect(await c.both(false, false)).to.equal(false);
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            function both(bool x, bool y) public pure returns (bool) {
+                return x && y;
+            }
+        }
+explanation: |
+  Logical conjunction of two booleans using `&&`.
+visibility: after-pass
+

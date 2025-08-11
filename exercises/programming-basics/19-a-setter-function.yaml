@@ -1,0 +1,59 @@
+id: a-setter-function
+title: A setter Function
+category: programming-basics
+difficulty: beginner
+tags: [functions, state]
+objectives:
+  - Write a function that takes a uint and updates a state variable with that value
+description: |
+  Inside the `Problem` contract, declare `uint public value;` and write a function `set(uint x)`
+  that updates `value` to `x`.
+hints:
+  - "No visibility modifier requirement; `public` is fine"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: declare `uint public value;` and add `function set(uint x) public` to set it
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("updates value via setter", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            const tx = await c.set(42);
+            await tx.wait();
+            expect(await c.value()).to.equal(42n);
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            uint public value;
+            function set(uint x) public {
+                value = x;
+            }
+        }
+explanation: |
+  Demonstrates a basic setter that mutates contract state.
+visibility: after-pass
+

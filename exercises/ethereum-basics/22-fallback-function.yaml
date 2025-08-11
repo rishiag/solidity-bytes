@@ -1,0 +1,55 @@
+id: fallback-function
+title: The fallback Function
+category: ethereum-basics
+difficulty: beginner
+tags: [fallback]
+objectives:
+  - Implement a fallback() function to handle calls to non-existent functions
+description: |
+  Implement `fallback() external payable {}` to handle unknown calls and optionally accept ETH.
+hints:
+  - "fallback can be payable and has signature: fallback() external [payable]"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: implement fallback() external payable {}
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("handles unknown function via fallback", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            // send tx to unknown selector
+            const data = '0x12345678';
+            await expect(ethers.provider.sendTransaction({ to: c.target, data, value: 0 })).to.be.fulfilled;
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            fallback() external payable {}
+        }
+explanation: |
+  The `fallback()` function runs when no other function matches the call data.
+visibility: after-pass
+

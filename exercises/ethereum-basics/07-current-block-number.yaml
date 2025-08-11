@@ -1,0 +1,57 @@
+id: current-block-number
+title: Current Block Number
+category: ethereum-basics
+difficulty: beginner
+tags: [block, number]
+objectives:
+  - Create a function that returns the current block number (block.number)
+description: |
+  Inside the `Problem` contract, write a function `blockNum()` that returns `block.number`.
+hints:
+  - "Use block.number"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: function blockNum() public view returns (uint)
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("returns current block number", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            const n = await c.blockNum();
+            expect(n).to.be.a('bigint');
+            expect(n).to.be.greaterThan(0n);
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            function blockNum() public view returns (uint) {
+                return block.number;
+            }
+        }
+explanation: |
+  Uses the global `block.number` to read the current block height.
+visibility: after-pass
+

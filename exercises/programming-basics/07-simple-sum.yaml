@@ -1,0 +1,55 @@
+id: simple-sum
+title: Simple Sum
+category: programming-basics
+difficulty: beginner
+tags: [functions, pure, arithmetic]
+objectives:
+  - Create a pure function that accepts two uints and returns their sum
+description: |
+  Inside the `Problem` contract, write a `pure` function `add(uint a, uint b)` that returns `a + b`.
+hints:
+  - "Mark the function as pure since it doesn't read or modify state"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: pure function add(uint a, uint b) returns (uint)
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("returns sum", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            expect(await c.add(2, 3)).to.equal(5n);
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            function add(uint a, uint b) public pure returns (uint) {
+                return a + b;
+            }
+        }
+explanation: |
+  A `pure` function does not read or modify state; it computes and returns `a + b`.
+visibility: after-pass
+

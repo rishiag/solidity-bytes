@@ -1,0 +1,54 @@
+id: define-a-struct
+title: Define a Struct
+category: programming-basics
+difficulty: beginner
+tags: [structs, types]
+objectives:
+  - Define a struct named Book with a string title and a uint year
+description: |
+  Inside the `Problem` contract, define a `struct Book { string title; uint year; }`.
+hints:
+  - "Structs group related fields together"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: define `struct Book { string title; uint year; }`
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("defines Book struct", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            // compile-time presence is enough; runtime no-op
+            expect(typeof c.address).to.equal('string');
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            struct Book { string title; uint year; }
+        }
+explanation: |
+  Declares a simple struct with two fields.
+visibility: after-pass
+

@@ -1,0 +1,58 @@
+id: if-else-logic
+title: if-else Logic
+category: programming-basics
+difficulty: beginner
+tags: [functions, control-flow]
+objectives:
+  - Create a function that returns "Even" or "Odd" based on the uint input
+description: |
+  Inside the `Problem` contract, write a `pure` function `parity(uint x)` that returns
+  `"Even"` if `x % 2 == 0`, otherwise return `"Odd"`.
+hints:
+  - "Use x % 2 to check parity"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: function parity(uint x) public pure returns (string memory)
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("returns Even or Odd", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            expect(await c.parity(2)).to.equal("Even");
+            expect(await c.parity(7)).to.equal("Odd");
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            function parity(uint x) public pure returns (string memory) {
+                if (x % 2 == 0) return "Even";
+                return "Odd";
+            }
+        }
+explanation: |
+  Uses `% 2` to decide parity and a simple if-else to return the appropriate string.
+visibility: after-pass
+

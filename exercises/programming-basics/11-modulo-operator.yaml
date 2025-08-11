@@ -1,0 +1,56 @@
+id: modulo-operator
+title: Modulo Operator
+category: programming-basics
+difficulty: beginner
+tags: [functions, pure, arithmetic]
+objectives:
+  - Create a pure function that returns the remainder of 10 divided by 3
+description: |
+  Inside the `Problem` contract, write a `pure` function `rem()` that returns the
+  remainder of `10` divided by `3`.
+hints:
+  - "Use the `%` operator: 10 % 3"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: pure function rem() returns (uint) -> 10 % 3
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("returns 10 % 3", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            expect(await c.rem()).to.equal(1n);
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            function rem() public pure returns (uint) {
+                return 10 % 3;
+            }
+        }
+explanation: |
+  The modulo operator `%` returns the remainder after division. `10 % 3` equals `1`.
+visibility: after-pass
+

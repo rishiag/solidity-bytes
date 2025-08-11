@@ -1,0 +1,56 @@
+id: greater-than
+title: Greater Than
+category: programming-basics
+difficulty: beginner
+tags: [functions, pure, comparisons]
+objectives:
+  - Create a pure function that returns true if the first uint input is greater than the second
+description: |
+  Inside the `Problem` contract, write a `pure` function `gt(uint a, uint b)` that returns `a > b`.
+hints:
+  - "Return a > b"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: pure function gt(uint a, uint b) returns (bool)
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("returns true if a > b", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            expect(await c.gt(9, 7)).to.equal(true);
+            expect(await c.gt(7, 9)).to.equal(false);
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            function gt(uint a, uint b) public pure returns (bool) {
+                return a > b;
+            }
+        }
+explanation: |
+  Simple `>` comparison in a `pure` function.
+visibility: after-pass
+

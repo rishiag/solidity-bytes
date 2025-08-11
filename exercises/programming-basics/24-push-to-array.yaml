@@ -1,0 +1,58 @@
+id: push-to-array
+title: Push to Array
+category: programming-basics
+difficulty: beginner
+tags: [arrays, state]
+objectives:
+  - Create a function that adds a new uint to the end of an array
+description: |
+  Inside the `Problem` contract, declare `uint[] public items;` and write a function `push(uint x)`
+  that appends `x` to the array.
+hints:
+  - "Use items.push(x)"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: declare `uint[] public items;` and add `function push(uint x) public { items.push(x); }`
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("pushes into items", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            await (await c.push(7)).wait();
+            expect(await c.items(0)).to.equal(7n);
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            uint[] public items;
+            function push(uint x) public {
+                items.push(x);
+            }
+        }
+explanation: |
+  Demonstrates appending to a dynamic array using `push`.
+visibility: after-pass
+

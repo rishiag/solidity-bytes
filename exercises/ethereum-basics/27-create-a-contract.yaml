@@ -1,0 +1,60 @@
+id: create-a-contract
+title: Create a Contract (new)
+category: ethereum-basics
+difficulty: beginner
+tags: [deployment]
+objectives:
+  - Write a function that deploys a new instance of another contract
+description: |
+  Implement `deploy()` that creates and returns the address of a new `Child` contract using `new Child()`.
+hints:
+  - "Use the `new` keyword to create contracts"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Child { function ping() external pure returns (bool){ return true; } }
+        contract Problem {
+            // Goal: function deploy() public returns (address)
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("deploys a Child contract via new", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            const addr = await c.deploy();
+            const child = await ethers.getContractAt("Child", addr);
+            expect(await child.ping()).to.equal(true);
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Child { function ping() external pure returns (bool){ return true; } }
+        contract Problem {
+            function deploy() public returns (address) {
+                Child ch = new Child();
+                return address(ch);
+            }
+        }
+explanation: |
+  Deploys a new contract instance using `new` and returns its address so callers can interact with it.
+visibility: after-pass
+

@@ -1,0 +1,56 @@
+id: default-zero
+title: Default Zero
+category: programming-basics
+difficulty: beginner
+tags: [variables, integers, state]
+objectives:
+  - Declare a public uint named defaultValue without initializing it
+description: |
+  Inside the `Problem` contract, declare a `public` unsigned integer (`uint`) state variable
+  named `defaultValue` and do not set an explicit initial value. Observe the default.
+hints:
+  - "Uninitialized uint defaults to 0"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: declare a public uint named `defaultValue` (no initializer)
+            // Write your code below this line.
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("exposes defaultValue() which defaults to 0", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            expect(await c.defaultValue()).to.equal(0n);
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            uint public defaultValue;
+        }
+explanation: |
+  Uninitialized state variables use Solidity's default values. For `uint` that value is `0`.
+  Marking it `public` exposes a `defaultValue()` getter.
+visibility: after-pass
+

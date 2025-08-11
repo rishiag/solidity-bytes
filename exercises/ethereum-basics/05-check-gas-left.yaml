@@ -1,0 +1,57 @@
+id: check-gas-left
+title: Check Gas Left
+category: ethereum-basics
+difficulty: beginner
+tags: [gas, diagnostics]
+objectives:
+  - Create a function that returns the amount of gas remaining (gasleft())
+description: |
+  Inside the `Problem` contract, write a function `remaining()` that returns `gasleft()`.
+hints:
+  - "Use the built-in function gasleft()"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: function remaining() public view returns (uint)
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("returns some positive gas value", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            const v = await c.remaining();
+            expect(v).to.be.a('bigint');
+            expect(v).to.be.greaterThan(0n);
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            function remaining() public view returns (uint) {
+                return gasleft();
+            }
+        }
+explanation: |
+  `gasleft()` returns the approximate gas remaining for the current execution context.
+visibility: after-pass
+

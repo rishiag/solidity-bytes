@@ -1,0 +1,55 @@
+id: wei-gwei-ether
+title: Wei, Gwei, Ether
+category: ethereum-basics
+difficulty: beginner
+tags: [units]
+objectives:
+  - Write a function that returns true if 1 ether equals 1e18 wei
+description: |
+  Inside the `Problem` contract, write a `pure` function `checkUnits()` that returns `true` if `1 ether == 1e18 wei`.
+hints:
+  - "Use Solidity unit suffixes: wei, gwei, ether"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: pure function checkUnits() returns (bool)
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("validates unit equivalence", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            expect(await c.checkUnits()).to.equal(true);
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            function checkUnits() public pure returns (bool) {
+                return 1 ether == 1e18 wei;
+            }
+        }
+explanation: |
+  Solidity supports literal unit suffixes. 1 ether equals 1e9 gwei equals 1e18 wei.
+visibility: after-pass
+

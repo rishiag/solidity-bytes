@@ -1,0 +1,56 @@
+id: private-function
+title: private Function
+category: ethereum-basics
+difficulty: beginner
+tags: [visibility]
+objectives:
+  - Create a private helper function that can only be called from within the same contract
+description: |
+  Inside the `Problem` contract, create a `private` function `double(uint x)` that returns `x * 2` and a
+  public function `useDouble(uint x)` that returns `double(x)`.
+hints:
+  - "private functions are not visible to external callers"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: function double(uint x) private pure returns (uint)
+            // and public useDouble(uint x) that calls double(x)
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("uses private helper via public wrapper", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            expect(await c.useDouble(4)).to.equal(8n);
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            function double(uint x) private pure returns (uint) { return x * 2; }
+            function useDouble(uint x) public pure returns (uint) { return double(x); }
+        }
+explanation: |
+  Demonstrates private function encapsulation and a public wrapper that exercises it.
+visibility: after-pass
+

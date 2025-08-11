@@ -1,0 +1,56 @@
+id: contract-balance
+title: Contract's Balance
+category: ethereum-basics
+difficulty: beginner
+tags: [balance]
+objectives:
+  - Create a function to check the current Ether balance of the contract itself
+description: |
+  Implement `balance()` that returns `address(this).balance`.
+hints:
+  - "Use address(this).balance"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: function balance() public view returns (uint)
+            function deposit() public payable {}
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("reports contract ether balance", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            await (await c.deposit({ value: ethers.parseEther("0.2") })).wait();
+            expect(await c.balance()).to.equal(ethers.parseEther("0.2"));
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            function deposit() public payable {}
+            function balance() public view returns (uint) { return address(this).balance; }
+        }
+explanation: |
+  `address(this).balance` returns the wei held by the contract.
+visibility: after-pass
+

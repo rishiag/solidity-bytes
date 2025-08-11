@@ -1,0 +1,53 @@
+id: declare-an-event
+title: Declare an Event
+category: ethereum-basics
+difficulty: beginner
+tags: [events]
+objectives:
+  - Declare an event named PaymentReceived that logs an address and an amount
+description: |
+  Inside the `Problem` contract, declare `event PaymentReceived(address from, uint amount);`.
+hints:
+  - "Events are declared at contract scope"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: event PaymentReceived(address from, uint amount);
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("declares event", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            expect(typeof c.address).to.equal('string');
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            event PaymentReceived(address from, uint amount);
+        }
+explanation: |
+  Declares an event that can be emitted in later exercises.
+visibility: after-pass
+

@@ -1,0 +1,57 @@
+id: current-timestamp
+title: Current Timestamp
+category: ethereum-basics
+difficulty: beginner
+tags: [block, timestamp]
+objectives:
+  - Write a function that returns the current block's timestamp (block.timestamp)
+description: |
+  Inside the `Problem` contract, write a function `nowTs()` that returns `block.timestamp`.
+hints:
+  - "Use block.timestamp (alias: now is deprecated)"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: function nowTs() public view returns (uint)
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("returns a plausible timestamp", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            const ts = await c.nowTs();
+            expect(ts).to.be.a('bigint');
+            expect(ts).to.be.greaterThan(0n);
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            function nowTs() public view returns (uint) {
+                return block.timestamp;
+            }
+        }
+explanation: |
+  Returns the current block timestamp in seconds since the Unix epoch.
+visibility: after-pass
+

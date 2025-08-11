@@ -1,0 +1,60 @@
+id: create-a-struct-instance
+title: Create a Struct Instance
+category: programming-basics
+difficulty: beginner
+tags: [structs, memory]
+objectives:
+  - Write a function that creates a Book in memory and returns it
+description: |
+  Using the `Book` struct (`string title; uint year;`), write a `pure` function `make(string memory t, uint y)`
+  that returns a `Book` with those values.
+hints:
+  - "Return Book({ title: t, year: y })"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            struct Book { string title; uint year; }
+            // Goal: function make(string memory t, uint y) public pure returns (Book memory)
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("creates and returns a Book", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            const b = await c.make("Title", 2024);
+            expect(b.title).to.equal("Title");
+            expect(b.year).to.equal(2024n);
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            struct Book { string title; uint year; }
+            function make(string memory t, uint y) public pure returns (Book memory) {
+                return Book({ title: t, year: y });
+            }
+        }
+explanation: |
+  Demonstrates returning a struct value constructed in memory using named arguments.
+visibility: after-pass
+

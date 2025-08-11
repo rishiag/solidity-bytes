@@ -1,0 +1,55 @@
+id: multiply-two-numbers
+title: Multiply Two Numbers
+category: programming-basics
+difficulty: beginner
+tags: [functions, pure, arithmetic]
+objectives:
+  - Write a pure function that takes two uints and returns their product
+description: |
+  Inside the `Problem` contract, write a `pure` function `mul(uint a, uint b)` that returns `a * b`.
+hints:
+  - "Return a * b"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: pure function mul(uint a, uint b) returns (uint)
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("returns product", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            expect(await c.mul(3, 4)).to.equal(12n);
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            function mul(uint a, uint b) public pure returns (uint) {
+                return a * b;
+            }
+        }
+explanation: |
+  Multiplies two unsigned integers in a `pure` function.
+visibility: after-pass
+

@@ -1,0 +1,55 @@
+id: exponentiation
+title: Exponentiation
+category: programming-basics
+difficulty: beginner
+tags: [functions, pure, arithmetic]
+objectives:
+  - Write a pure function that takes a uint x and returns x to the power of 3
+description: |
+  Inside the `Problem` contract, write a `pure` function `cube(uint x)` that returns `x ** 3`.
+hints:
+  - "Use the exponent operator `**`"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: pure function cube(uint x) returns (uint)
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("returns cube", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            expect(await c.cube(3)).to.equal(27n);
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            function cube(uint x) public pure returns (uint) {
+                return x ** 3;
+            }
+        }
+explanation: |
+  Uses Solidity's exponent operator `**` to compute `x` cubed.
+visibility: after-pass
+

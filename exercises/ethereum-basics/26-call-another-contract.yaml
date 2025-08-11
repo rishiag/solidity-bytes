@@ -1,0 +1,63 @@
+id: call-another-contract
+title: Call Another Contract
+category: ethereum-basics
+difficulty: beginner
+tags: [interfaces, calls]
+objectives:
+  - Use an interface to call the getValue() function of another deployed contract
+description: |
+  Define `interface ITarget { function getValue() external view returns (uint); }` and implement
+  `read(address target)` that returns `ITarget(target).getValue()`.
+hints:
+  - "Cast the address to the interface and call"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        interface ITarget { function getValue() external view returns (uint); }
+        contract Problem {
+            // Goal: function read(address target) public view returns (uint)
+        }
+    - path: contracts/Target.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+        contract Target { function getValue() external pure returns (uint){ return 123; } }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("reads value from another contract via interface", async function () {
+            const T = await ethers.getContractFactory("Target");
+            const t = await T.deploy();
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            expect(await c.read(t.target)).to.equal(123n);
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        interface ITarget { function getValue() external view returns (uint); }
+        contract Problem {
+            function read(address target) public view returns (uint) { return ITarget(target).getValue(); }
+        }
+explanation: |
+  Uses an interface type to invoke a function on a different contract at a known address.
+visibility: after-pass
+

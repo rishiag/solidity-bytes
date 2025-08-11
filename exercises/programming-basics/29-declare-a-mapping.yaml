@@ -1,0 +1,54 @@
+id: declare-a-mapping
+title: Declare a Mapping
+category: programming-basics
+difficulty: beginner
+tags: [mappings, state]
+objectives:
+  - Declare a public mapping from address to uint named balances
+description: |
+  Inside the `Problem` contract, declare `mapping(address => uint) public balances;`.
+hints:
+  - "Mapping syntax: mapping(KeyType => ValueType) name;"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: declare `mapping(address => uint) public balances;`
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("declares public balances mapping", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            const [a] = await ethers.getSigners();
+            expect(await c.balances(a.address)).to.equal(0n);
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            mapping(address => uint) public balances;
+        }
+explanation: |
+  A simple public mapping from address to uint provides a getter that takes an address and returns the current value.
+visibility: after-pass
+

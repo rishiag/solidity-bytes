@@ -1,0 +1,61 @@
+id: simple-ownable
+title: Simple Ownable
+category: ethereum-basics
+difficulty: beginner
+tags: [ownership, modifiers]
+objectives:
+  - Create a modifier onlyOwner that restricts a function's access to the owner address
+description: |
+  Declare `address public owner;` set in the constructor. Create `modifier onlyOwner()` that requires
+  `msg.sender == owner`. Protect a function `secret()` so only the owner can call it.
+hints:
+  - "Define modifier onlyOwner() { require(msg.sender==owner, 'not owner'); _; }"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: address public owner; constructor(){owner=msg.sender;}
+            // modifier onlyOwner() { require(msg.sender==owner, 'not owner'); _; }
+            // function secret() public onlyOwner returns (bool) { return true; }
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("restricts access to owner", async function () {
+            const [owner, other] = await ethers.getSigners();
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.connect(owner).deploy();
+            expect(await c.connect(owner).secret()).to.equal(true);
+            await expect(c.connect(other).secret()).to.be.reverted;
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            address public owner;
+            constructor(){ owner = msg.sender; }
+            modifier onlyOwner(){ require(msg.sender==owner, 'not owner'); _; }
+            function secret() public onlyOwner returns (bool){ return true; }
+        }
+explanation: |
+  A minimal ownable pattern using a modifier to guard function access.
+visibility: after-pass
+

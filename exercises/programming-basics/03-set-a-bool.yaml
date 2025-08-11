@@ -1,0 +1,56 @@
+id: set-a-bool
+title: Set a bool
+category: programming-basics
+difficulty: beginner
+tags: [variables, booleans, state]
+objectives:
+  - Declare a public boolean `isLearning` and set its initial value to true
+description: |
+  Inside the `Problem` contract, declare a `public` `bool` state variable named `isLearning`
+  and initialize it to `true`.
+hints:
+  - "Use: bool public name = true;"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: declare a public bool named `isLearning` initialized to true
+            // Write your code below this line.
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("exposes isLearning() initialized to true", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            expect(await c.isLearning()).to.equal(true);
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            bool public isLearning = true;
+        }
+explanation: |
+  Declares a public boolean state variable initialized to `true`. Public visibility
+  generates an `isLearning()` getter.
+visibility: after-pass
+

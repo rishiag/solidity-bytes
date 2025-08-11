@@ -1,0 +1,56 @@
+id: initialize-a-string
+title: Initialize a string
+category: programming-basics
+difficulty: beginner
+tags: [variables, strings, state]
+objectives:
+  - Declare and initialize a public string state variable named greeting to "Hello"
+description: |
+  Inside the `Problem` contract, declare a `public` `string` state variable named `greeting`
+  and initialize it to the literal value `"Hello"`.
+hints:
+  - "State string with initialization looks like: string public name = \"Value\";"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: declare a public string named `greeting` initialized to "Hello"
+            // Write your code below this line.
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("exposes greeting() initialized to 'Hello'", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            expect(await c.greeting()).to.equal("Hello");
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            string public greeting = "Hello";
+        }
+explanation: |
+  Declares and initializes a public `string` state variable. Marking it `public`
+  generates a getter `greeting()` which returns "Hello".
+visibility: after-pass
+

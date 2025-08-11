@@ -1,0 +1,63 @@
+id: sending-ether-with-call
+title: Sending Ether with call
+category: ethereum-basics
+difficulty: beginner
+tags: [payments, call]
+objectives:
+  - Write a function that sends a fixed amount of Ether to a specific address using the call method
+description: |
+  Implement `payOut(address payable to)` that transfers `0.01 ether` to `to` using `(bool ok, ) = to.call{value: 0.01 ether}(""); require(ok)`.
+hints:
+  - "Use call with value and check the returned boolean"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            function deposit() public payable {}
+            // Goal: function payOut(address payable to) public
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("sends ether via call", async function () {
+            const [a,b] = await ethers.getSigners();
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            await (await c.deposit({ value: ethers.parseEther("0.05") })).wait();
+            const before = await ethers.provider.getBalance(b.address);
+            await (await c.payOut(b.address)).wait();
+            const after = await ethers.provider.getBalance(b.address);
+            expect(after - before).to.equal(ethers.parseEther("0.01"));
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            function deposit() public payable {}
+            function payOut(address payable to) public {
+                (bool ok, ) = to.call{value: 0.01 ether}("");
+                require(ok, "send failed");
+            }
+        }
+explanation: |
+  Uses low-level `call` with value for sending ETH and checks the success boolean.
+visibility: after-pass
+

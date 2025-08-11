@@ -1,0 +1,57 @@
+id: check-invariants-with-assert
+title: Check Invariants with assert
+category: ethereum-basics
+difficulty: beginner
+tags: [assert, invariants]
+objectives:
+  - Use assert to check a condition that should theoretically never be false
+description: |
+  Inside the `Problem` contract, write a `pure` function `identity(uint x)` that returns `x` and uses
+  `assert(x == x)`.
+hints:
+  - "Use assert for invariants that indicate a bug if violated"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: function identity(uint x) public pure returns (uint) { assert(x == x); return x; }
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("returns x and asserts invariant", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            expect(await c.identity(5)).to.equal(5n);
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            function identity(uint x) public pure returns (uint) {
+                assert(x == x);
+                return x;
+            }
+        }
+explanation: |
+  `assert` is for internal correctness checks; failing asserts consume all gas and indicate a bug.
+visibility: after-pass
+

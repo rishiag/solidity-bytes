@@ -1,0 +1,57 @@
+id: the-constructor
+title: The Constructor
+category: ethereum-basics
+difficulty: beginner
+tags: [constructor, ownership]
+objectives:
+  - Use the constructor to set an owner state variable upon deployment
+description: |
+  Inside the `Problem` contract, declare `address public owner;` and set it in the constructor to `msg.sender`.
+hints:
+  - "Assign owner in the constructor"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: address public owner; constructor() { owner = msg.sender; }
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("sets owner in constructor", async function () {
+            const [a] = await ethers.getSigners();
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            expect(await c.owner()).to.equal(a.address);
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            address public owner;
+            constructor() {
+                owner = msg.sender;
+            }
+        }
+explanation: |
+  The constructor runs once at deployment. Recording `msg.sender` as `owner` establishes simple ownership.
+visibility: after-pass
+

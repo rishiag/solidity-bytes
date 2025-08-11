@@ -1,0 +1,58 @@
+id: read-from-a-mapping
+title: Read from a Mapping
+category: programming-basics
+difficulty: beginner
+tags: [mappings, view]
+objectives:
+  - Write a function that returns the balance for a given address
+description: |
+  Inside the `Problem` contract, declare `mapping(address => uint) public balances;` and write a `view`
+  function `balanceOf(address a)` that returns `balances[a]`.
+hints:
+  - "Reading from a public mapping can be done via the auto-generated getter or a helper"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: balances mapping and function balanceOf(address a) public view returns (uint)
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("reads from mapping", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            const [a] = await ethers.getSigners();
+            await (await c.set(a.address, 5)).wait();
+            expect(await c.balanceOf(a.address)).to.equal(5n);
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            mapping(address => uint) public balances;
+            function set(address a, uint amount) public { balances[a] = amount; }
+            function balanceOf(address a) public view returns (uint) { return balances[a]; }
+        }
+explanation: |
+  Returns the value stored in the mapping for a given address.
+visibility: after-pass
+

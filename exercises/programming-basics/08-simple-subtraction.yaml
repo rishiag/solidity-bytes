@@ -1,0 +1,55 @@
+id: simple-subtraction
+title: Simple Subtraction
+category: programming-basics
+difficulty: beginner
+tags: [functions, pure, arithmetic]
+objectives:
+  - Create a pure function that accepts two ints and returns their difference
+description: |
+  Inside the `Problem` contract, write a `pure` function `sub(int a, int b)` that returns `a - b`.
+hints:
+  - "Use int for signed integers; return a - b"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: pure function sub(int a, int b) returns (int)
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("returns difference", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            expect(await c.sub(7, 3)).to.equal(4);
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            function sub(int a, int b) public pure returns (int) {
+                return a - b;
+            }
+        }
+explanation: |
+  Uses signed integers and a `pure` function to compute subtraction.
+visibility: after-pass
+

@@ -1,0 +1,59 @@
+id: value-sent
+title: Value Sent
+category: ethereum-basics
+difficulty: beginner
+tags: [payable, msg.value]
+objectives:
+  - Create a payable function that returns the amount of Ether sent with the call (msg.value)
+description: |
+  Inside the `Problem` contract, write a `payable` function `sent()` that returns `msg.value`.
+hints:
+  - "Mark the function as payable to allow ETH to be sent"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: payable function sent() public payable returns (uint)
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("returns msg.value", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            const tx = await c.sent({ value: ethers.parseEther("0.5") });
+            await tx.wait();
+            // call again via callStatic to read return value
+            const v = await c.callStatic.sent({ value: ethers.parseEther("0.5") });
+            expect(v).to.equal(ethers.parseEther("0.5"));
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            function sent() public payable returns (uint) {
+                return msg.value;
+            }
+        }
+explanation: |
+  `msg.value` carries the amount of wei sent with a payable call; returning it echoes the payment size.
+visibility: after-pass
+

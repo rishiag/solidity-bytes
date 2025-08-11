@@ -1,0 +1,58 @@
+id: validate-with-require
+title: Validate Input with require
+category: ethereum-basics
+difficulty: beginner
+tags: [errors, require]
+objectives:
+  - Make a function that only proceeds if the input uint is not zero, otherwise it fails
+description: |
+  Inside the `Problem` contract, write a function `onlyNonZero(uint x)` that `require`s `x != 0` and returns
+  `true` when the check passes.
+hints:
+  - "Use: require(x != 0, 'zero');"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: function onlyNonZero(uint x) public pure returns (bool)
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("reverts on zero and returns true otherwise", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            await expect(c.onlyNonZero(0)).to.be.reverted;
+            expect(await c.onlyNonZero(1)).to.equal(true);
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            function onlyNonZero(uint x) public pure returns (bool) {
+                require(x != 0, 'zero');
+                return true;
+            }
+        }
+explanation: |
+  `require` is used for input validation and will revert (refund remaining gas) if the condition fails.
+visibility: after-pass
+

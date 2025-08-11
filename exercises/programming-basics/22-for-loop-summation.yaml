@@ -1,0 +1,60 @@
+id: for-loop-summation
+title: for Loop Summation
+category: programming-basics
+difficulty: beginner
+tags: [loops, control-flow, arithmetic]
+objectives:
+  - Use a for loop to sum numbers from 1 to a given input n
+description: |
+  Inside the `Problem` contract, write a `pure` function `sumTo(uint n)` that returns the sum
+  of integers from `1` to `n` inclusive.
+hints:
+  - "Initialize an accumulator and loop i from 1 to n"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: pure function sumTo(uint n) returns (uint)
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("sums 1..n", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            expect(await c.sumTo(5)).to.equal(15n); // 1+2+3+4+5
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            function sumTo(uint n) public pure returns (uint) {
+                uint s;
+                for (uint i = 1; i <= n; i++) {
+                    s += i;
+                }
+                return s;
+            }
+        }
+explanation: |
+  Classic for-loop accumulation from 1..n.
+visibility: after-pass
+

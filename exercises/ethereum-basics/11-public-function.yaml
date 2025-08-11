@@ -1,0 +1,54 @@
+id: public-function
+title: public Function
+category: ethereum-basics
+difficulty: beginner
+tags: [visibility]
+objectives:
+  - Create a simple public function that can be called by anyone
+description: |
+  Inside the `Problem` contract, write `function ping() public pure returns (string memory)` that returns
+  `"pong"`.
+hints:
+  - "public functions are callable by anyone"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: function ping() public pure returns (string memory) { return "pong"; }
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("public function returns pong", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            expect(await c.ping()).to.equal("pong");
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            function ping() public pure returns (string memory) { return "pong"; }
+        }
+explanation: |
+  A trivial public function callable by anyone (EOA or contract).
+visibility: after-pass
+

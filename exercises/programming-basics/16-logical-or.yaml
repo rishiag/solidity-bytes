@@ -1,0 +1,57 @@
+id: logical-or
+title: Logical OR
+category: programming-basics
+difficulty: beginner
+tags: [functions, pure, logic]
+objectives:
+  - Write a pure function that takes two bools and returns true if at least one is true
+description: |
+  Inside the `Problem` contract, write a `pure` function `either(bool x, bool y)` that returns `x || y`.
+hints:
+  - "Use logical OR: x || y"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: pure function either(bool x, bool y) returns (bool)
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("returns true if at least one is true", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            expect(await c.either(true, false)).to.equal(true);
+            expect(await c.either(false, true)).to.equal(true);
+            expect(await c.either(false, false)).to.equal(false);
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            function either(bool x, bool y) public pure returns (bool) {
+                return x || y;
+            }
+        }
+explanation: |
+  Logical disjunction using `||`: returns true when at least one input is true.
+visibility: after-pass
+

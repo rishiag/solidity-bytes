@@ -1,0 +1,56 @@
+id: function-with-input
+title: Function with Input
+category: programming-basics
+difficulty: beginner
+tags: [functions, parameters]
+objectives:
+  - Create a function that accepts a string and returns it
+description: |
+  Inside the `Problem` contract, write a function `echo(string memory s)` that returns the same string.
+hints:
+  - "Use `memory` for string parameters/returns in public/external functions"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: function echo(string memory s) public pure returns (string memory)
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("returns the same string", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            expect(await c.echo("hi"))
+              .to.equal("hi");
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            function echo(string memory s) public pure returns (string memory) {
+                return s;
+            }
+        }
+explanation: |
+  Demonstrates string parameters/returns with `memory` and a simple return.
+visibility: after-pass
+

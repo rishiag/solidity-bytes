@@ -1,0 +1,58 @@
+id: simple-if-statement
+title: Simple if Statement
+category: programming-basics
+difficulty: beginner
+tags: [functions, control-flow]
+objectives:
+  - Write a function that returns "Correct" if the input uint is 42
+description: |
+  Inside the `Problem` contract, write a function `check(uint x)` that returns the string
+  `"Correct"` if `x` equals `42`, otherwise return an empty string.
+hints:
+  - "Compare x == 42 and return a string literal"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: function check(uint x) public pure returns (string memory)
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("returns 'Correct' if input is 42", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            expect(await c.check(42)).to.equal("Correct");
+            expect(await c.check(41)).to.equal("");
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            function check(uint x) public pure returns (string memory) {
+                if (x == 42) return "Correct";
+                return "";
+            }
+        }
+explanation: |
+  Demonstrates a minimal if statement and returning string literals from a `pure` function.
+visibility: after-pass
+

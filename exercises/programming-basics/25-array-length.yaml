@@ -1,0 +1,58 @@
+id: array-length
+title: Array Length
+category: programming-basics
+difficulty: beginner
+tags: [arrays, view]
+objectives:
+  - Write a function that returns the length of a uint array
+description: |
+  Inside the `Problem` contract, declare `uint[] public items;` and write a `view` function
+  `len()` that returns `items.length`.
+hints:
+  - "Array length is available via `.length`"
+starter:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            // Goal: `uint[] public items;` and `function len() public view returns (uint)`
+        }
+    - path: hardhat.config.js
+      content: |
+        require("@nomicfoundation/hardhat-toolbox");
+        module.exports = { solidity: "0.8.24" };
+tests:
+  files:
+    - path: test/Problem.test.js
+      content: |
+        const { expect } = require("chai");
+        const { ethers } = require("hardhat");
+
+        describe("Problem", function () {
+          it("returns items length", async function () {
+            const Factory = await ethers.getContractFactory("Problem");
+            const c = await Factory.deploy();
+            await (await c.push(1)).wait();
+            await (await c.push(2)).wait();
+            expect(await c.len()).to.equal(2n);
+          });
+        });
+solution:
+  files:
+    - path: contracts/Problem.sol
+      content: |
+        // SPDX-License-Identifier: MIT
+        pragma solidity ^0.8.24;
+
+        contract Problem {
+            uint[] public items;
+            function push(uint x) public { items.push(x); }
+            function len() public view returns (uint) { return items.length; }
+        }
+explanation: |
+  Reads the dynamic array length via `.length` and returns it from a `view` function.
+visibility: after-pass
+
