@@ -5,6 +5,7 @@ import path from 'path';
 import { execSync, spawn } from 'child_process';
 import { fileURLToPath } from 'url';
 import YAML from 'yaml';
+import crypto from 'crypto';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -48,12 +49,22 @@ function findExerciseYaml(exerciseId) {
   die(`Exercise not found: ${exerciseId}`);
 }
 
+// Use a stable workspace per exercise to cache node_modules across runs
 function makeWorkdir(exerciseId) {
-  const base = path.join(process.cwd(), '.runner', 'tmp');
+  const base = path.join(process.cwd(), '.runner', 'workspaces');
   fs.mkdirpSync(base);
-  const dir = path.join(base, `${exerciseId}-${Date.now()}`);
+  const dir = path.join(base, exerciseId);
   fs.mkdirpSync(dir);
   return dir;
+}
+
+function cleanWorkdirPreserveDeps(workdir) {
+  const keep = new Set(['node_modules', 'package-lock.json', '.deps.hash']);
+  if (!fs.existsSync(workdir)) return;
+  for (const entry of fs.readdirSync(workdir)) {
+    if (keep.has(entry)) continue;
+    fs.removeSync(path.join(workdir, entry));
+  }
 }
 
 function writeFiles(files, workdir) {
@@ -64,29 +75,61 @@ function writeFiles(files, workdir) {
   }
 }
 
+function desiredPkg() {
+  return {
+    name: 'exercise-runner',
+    private: true,
+    version: '0.0.0',
+    scripts: { test: 'hardhat test' },
+    dependencies: {
+      hardhat: '^2.22.5',
+      '@nomicfoundation/hardhat-toolbox': '^4.0.0',
+      ethers: '^6.12.0',
+      chai: '^4.3.10',
+      mocha: '^10.4.0'
+    }
+  };
+}
+
 function ensurePkg(workdir) {
   const pkgPath = path.join(workdir, 'package.json');
-  if (!fs.existsSync(pkgPath)) {
-    const pkg = {
-      name: 'exercise-runner',
-      private: true,
-      version: '0.0.0',
-      scripts: { test: 'hardhat test' },
-      dependencies: {
-        hardhat: '^2.22.5',
-        '@nomicfoundation/hardhat-toolbox': '^4.0.0',
-        ethers: '^6.12.0',
-        chai: '^4.3.10',
-        mocha: '^10.4.0'
-      }
-    };
-    fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2));
+  const pkg = desiredPkg();
+  // Always (re)write package.json to keep in sync with runner spec
+  fs.writeFileSync(pkgPath, JSON.stringify(pkg, null, 2));
+  return pkg;
+}
+
+function pkgHash(pkgObj) {
+  const json = JSON.stringify(pkgObj);
+  return crypto.createHash('sha256').update(json).digest('hex');
+}
+
+function shouldInstallDeps(workdir, pkgObj) {
+  const nm = path.join(workdir, 'node_modules');
+  const hashPath = path.join(workdir, '.deps.hash');
+  if (!fs.existsSync(nm)) return true;
+  const want = pkgHash(pkgObj);
+  try {
+    const have = fs.readFileSync(hashPath, 'utf8').trim();
+    return have !== want;
+  } catch {
+    return true;
   }
 }
 
-async function npmInstall(workdir, verbose) {
+async function npmInstallIfNeeded(workdir, pkgObj, verbose) {
+  const need = shouldInstallDeps(workdir, pkgObj);
+  if (!need) {
+    if (!verbose) process.stdout.write('(runner) Reusing cached dependencies\n');
+    return;
+  }
+  if (!verbose) process.stdout.write('(runner) Installing dependencies...\n');
   try {
-    execSync('npm i --silent', { cwd: workdir, stdio: verbose ? 'inherit' : 'ignore' });
+    // Prefer ci for speed/determinism if lock exists, fall back to install
+    const hasLock = fs.existsSync(path.join(workdir, 'package-lock.json'));
+    const cmd = hasLock ? 'npm ci --silent --no-audit --no-fund' : 'npm i --silent --no-audit --no-fund';
+    execSync(cmd, { cwd: workdir, stdio: verbose ? 'inherit' : 'ignore' });
+    fs.writeFileSync(path.join(workdir, '.deps.hash'), pkgHash(pkgObj));
   } catch (e) {
     die('npm install failed. Check network and try again.');
   }
@@ -98,7 +141,11 @@ async function runTests(workdir, verbose) {
     const p = spawn(cmd, ['hardhat', 'test'], {
       cwd: workdir,
       stdio: verbose ? 'inherit' : 'pipe',
-      env: process.env
+      env: {
+        ...process.env,
+        // Suppress Hardhat's node version warning in the runner context
+        HARDHAT_DISABLE_NODEJS_WARNING: '1',
+      }
     });
     let out = '';
     if (!verbose) {
@@ -116,6 +163,7 @@ async function main() {
   const args = parseArgs();
   const { doc } = findExerciseYaml(args.id);
   const workdir = makeWorkdir(doc.id);
+  cleanWorkdirPreserveDeps(workdir);
 
   const section = args.useSolution ? 'solution' : 'starter';
   if (!doc[section]?.files?.length || !doc.tests?.files?.length) {
@@ -144,8 +192,8 @@ async function main() {
     );
   }
 
-  ensurePkg(workdir);
-  await npmInstall(workdir, args.verbose);
+  const pkgObj = ensurePkg(workdir);
+  await npmInstallIfNeeded(workdir, pkgObj, args.verbose);
   const code = await runTests(workdir, args.verbose);
   process.exit(code);
 }

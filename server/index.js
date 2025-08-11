@@ -272,7 +272,7 @@ app.get('/submissions/:sid/stream', (req, res) => {
   child.stderr.on('data', onStderr);
 
   // Timeout/kill runaway runs
-  const KILL_AFTER_MS = 60 * 1000;
+  const KILL_AFTER_MS = 180 * 1000; // allow slower first runs (installs) during MVP
   const killer = setTimeout(() => {
     try { child.kill('SIGKILL'); } catch {}
   }, KILL_AFTER_MS);

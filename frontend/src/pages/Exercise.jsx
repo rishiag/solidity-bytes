@@ -1,18 +1,24 @@
 import React, { useEffect, useState } from 'react'
-import { Paper, Grid, Stack, Button, Chip, Typography, Alert, Box, Snackbar, Breadcrumbs, Link as MLink, LinearProgress } from '@mui/material'
+import {
+  Paper, Grid, Stack, Button, Chip, Typography, Alert, Box, Snackbar,
+  Breadcrumbs, Link as MLink, LinearProgress
+} from '@mui/material'
 import Editor from '@monaco-editor/react'
 import NotFound from './NotFound.jsx'
 
 export default function Exercise({ id }) {
   const [meta, setMeta] = useState(null)
   const [error, setError] = useState(null)
-  // cleaned: removed unused submission id state
   const [log, setLog] = useState('')
   const [running, setRunning] = useState(false)
   const [edited, setEdited] = useState({})
   const [exitCode, setExitCode] = useState(null)
   const [summary, setSummary] = useState(null)
   const [showHints, setShowHints] = useState(false)
+  const [showSolution, setShowSolution] = useState(false)
+  const [solution, setSolution] = useState(null)
+  const [solutionLoading, setSolutionLoading] = useState(false)
+  const [solutionError, setSolutionError] = useState(null)
   const [snack, setSnack] = useState({ open: false, message: '', severity: 'success' })
 
   useEffect(() => {
@@ -22,7 +28,6 @@ export default function Exercise({ id }) {
       .then(async (r) => {
         if (!r.ok) {
           if (r.status === 404) throw new Error('not_found')
-          // Try to surface useful message; avoid JSON parse on HTML
           const text = await r.text().catch(() => '')
           throw new Error(text || `http_${r.status}`)
         }
@@ -64,14 +69,11 @@ export default function Exercise({ id }) {
         es.close()
         setRunning(false)
         setExitCode(d.code)
-        // compute mocha summary from final log
         try {
           const s = parseMochaSummary(log)
           setSummary(s)
         } catch {}
-        // snackbar feedback
         setSnack({ open: true, message: d.code === 0 ? 'All tests passed' : 'Tests failed', severity: d.code === 0 ? 'success' : 'error' })
-        // cache progress for anonymous users only (server persists for logged-in)
         try {
           const me = await fetch('/api/auth/me').then(r=>r.json()).catch(()=>({}))
           if (!me.user) {
@@ -91,7 +93,6 @@ export default function Exercise({ id }) {
     }
   }
 
-  // Load saved code (if any) on mount/meta load
   useEffect(() => {
     if (!meta?.starter?.files) return
     const key = `sb:code:${id}`
@@ -103,13 +104,11 @@ export default function Exercise({ id }) {
         return
       } catch {}
     }
-    // Initialize with starter contents
     const init = {}
     for (const f of meta.starter.files) init[f.path] = f.content
     setEdited(init)
   }, [id, meta])
 
-  // Persist on edit
   useEffect(() => {
     if (!meta?.starter?.files?.length) return
     const key = `sb:code:${id}`
@@ -126,8 +125,10 @@ export default function Exercise({ id }) {
         <MLink href="#/" underline="hover">Exercises</MLink>
         <Typography color="text.secondary" noWrap maxWidth={480}>{meta.title}</Typography>
       </Breadcrumbs>
+
       <Paper variant="outlined" sx={{ position: 'sticky', top: 64, zIndex: 5, p: 1.5, mb: 2, display: 'flex', alignItems: 'center', gap: 1.5 }}>
-        <Chip size="small" label={id} variant="outlined" />
+        {/** Temporarily hide exercise id label */}
+        {/** <Chip size="small" label={id} variant="outlined" /> */}
         <Button size="small" variant="contained" onClick={() => run('starter')} disabled={running}>Run Code</Button>
         {exitCode !== null && (
           <Chip color={exitCode === 0 ? 'success' : 'error'} label={exitCode === 0 ? 'Passed' : 'Failed'} size="small" sx={{ ml: 1 }} />
@@ -138,7 +139,7 @@ export default function Exercise({ id }) {
           </Typography>
         )}
         <Button size="small" href={`#/`} sx={{ ml: 'auto' }}>Back to list</Button>
-        <Button size="small" href={`/api/exercises/${id}/solution`} target="_blank" rel="noreferrer">Solution</Button>
+        {/** Solution button moved next to Show hints below */}
         {running && (
           <Box sx={{ position: 'absolute', left: 0, right: 0, bottom: 0 }}>
             <LinearProgress />
@@ -146,17 +147,62 @@ export default function Exercise({ id }) {
         )}
       </Paper>
 
-      <Grid container spacing={2}>
-        <Grid item xs={12} md={6}>
+      {/* ---- LAYOUT: MUI Grid, no wrap on md+; right side grows to fill ---- */}
+      <Grid
+        container
+        spacing={2}
+        sx={{
+          flexWrap: { xs: 'wrap', md: 'nowrap' },    // stack on mobile; sit side-by-side on md+
+          alignItems: 'stretch',
+        }}
+      >
+        {/* LEFT rail (fixed width on md+) */}
+        <Grid
+          item
+          xs={12}
+          sx={{
+            flex: { md: '0 0 520px' },               // fixed column width on md+
+            maxWidth: { md: 520 },
+          }}
+        >
           <Paper variant="outlined" sx={{ p: 2, height: { xs: 'auto', md: 'calc(100dvh - 220px)' } }}>
             <Typography variant="h6" sx={{ mt: 0 }}>{meta.title}</Typography>
+            {/** Temporarily hide difficulty/tags */}
+            {/**
             <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
               [{meta.difficulty}] {meta.tags?.join(', ')}
             </Typography>
+            */}
             <Typography sx={{ whiteSpace: 'pre-wrap', mt: 1 }}>{meta.description}</Typography>
             <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
               <Button size="small" variant="outlined" onClick={() => setShowHints(v => !v)}>
-                {showHints ? 'Hide hints' : 'Show hints'}
+                {showHints ? 'Hide Hints' : 'Show Hints'}
+              </Button>
+              <Button
+                size="small"
+                variant="outlined"
+                onClick={async () => {
+                  setShowSolution((v) => !v)
+                  if (!showSolution && !solution && !solutionLoading) {
+                    try {
+                      setSolutionError(null)
+                      setSolutionLoading(true)
+                      const r = await fetch(`/api/exercises/${id}/solution`)
+                      if (!r.ok) {
+                        const msg = r.status === 401 ? 'Login required' : r.status === 403 ? 'Locked until you pass' : `Error ${r.status}`
+                        throw new Error(msg)
+                      }
+                      const d = await r.json()
+                      setSolution(d)
+                    } catch (e) {
+                      setSolutionError(String(e?.message || e))
+                    } finally {
+                      setSolutionLoading(false)
+                    }
+                  }
+                }}
+              >
+                {showSolution ? 'Hide Solution' : 'View Solution'}
               </Button>
             </Stack>
             {showHints && (
@@ -165,6 +211,36 @@ export default function Exercise({ id }) {
                   <Typography key={i} component="li" variant="body2" color="text.secondary">{h}</Typography>
                 ))}
               </Stack>
+            )}
+            {showSolution && (
+              <Box sx={{ mt: 1 }}>
+                {solutionLoading && <Typography variant="body2" color="text.secondary">Loading solution…</Typography>}
+                {solutionError && <Alert severity="warning" sx={{ my: 1 }}>{solutionError}</Alert>}
+                {solution?.files?.length > 0 && (
+                  <Stack sx={{ mt: 1 }}>
+                    {solution.files.map((f) => (
+                      <Box key={f.path} sx={{ mb: 1 }}>
+                        <Typography variant="caption" sx={{ display: 'block', mb: 0.5, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace' }}>{f.path}</Typography>
+                        <Box component="pre" sx={{
+                          fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+                          whiteSpace: 'pre',
+                          m: 0,
+                          fontSize: 13,
+                          lineHeight: 1.55,
+                          overflow: 'auto',
+                          p: 1,
+                          bgcolor: (t) => (t.palette.mode === 'dark' ? 'grey.900' : 'grey.50'),
+                          borderRadius: 1,
+                          border: 1,
+                          borderColor: 'divider'
+                        }}>
+                          {f.content}
+                        </Box>
+                      </Box>
+                    ))}
+                  </Stack>
+                )}
+              </Box>
             )}
           </Paper>
 
@@ -180,17 +256,68 @@ export default function Exercise({ id }) {
           )}
         </Grid>
 
-        <Grid item xs={12} md={6}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2, height: { xs: 'auto', md: 'calc(100dvh - 220px)' }, width: '100%', flex: 1, minHeight: 0, pl: 2, borderLeft: 1, borderColor: 'divider' }}>
-            <Paper variant="outlined" sx={{ p: 1.5, flex: 1, minHeight: 0, overflow: 'hidden', display: 'flex', flexDirection: 'column', width: '100%' }}>
+        {/* RIGHT rail (fills remaining width) */}
+        <Grid
+          item
+          xs={12}
+          sx={{
+            flex: { md: '1 1 auto' },                // <- grow to occupy all remaining width
+            minWidth: 0,                             // <- critical so children can expand
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 2,
+              height: { xs: 'auto', md: 'calc(100dvh - 220px)' },
+              pl: 2,
+              borderLeft: 1,
+              borderColor: 'divider',
+              minWidth: 0,
+            }}
+          >
+            <Paper
+              variant="outlined"
+              sx={{
+                p: 1.5,
+                flex: 1,
+                minHeight: 0,
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column',
+                width: '100%',
+                minWidth: 0,
+              }}
+            >
               {(() => {
                 const files = (meta.starter?.files || []).filter(f => !/hardhat\.config\.(?:js|cjs|ts)$/i.test(f.path))
                 const single = files.length === 1
                 return (
-                  <Box sx={{ overflow: 'auto', flex: 1, width: '100%' }}>
+                  <Box sx={{ overflow: 'auto', flex: 1, width: '100%', minWidth: 0 }}>
                     {files.map((f) => (
-                      <Box key={f.path} sx={{ mb: 2, display: 'flex', flexDirection: 'column', width: '100%', ...(single ? { height: '100%' } : {}) }}>
-                        <Typography variant="caption" sx={{ display: 'block', mb: 0.5, fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace' }}>{f.path}</Typography>
+                      <Box
+                        key={f.path}
+                        sx={{
+                          mb: 2,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          width: '100%',
+                          minWidth: 0,
+                          ...(single ? { height: '100%' } : {}),
+                        }}
+                      >
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            display: 'block',
+                            mb: 0.5,
+                            fontFamily:
+                              'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+                          }}
+                        >
+                          {f.path}
+                        </Typography>
                         <Editor
                           height={single ? '100%' : '220px'}
                           theme="vs-dark"
@@ -206,24 +333,40 @@ export default function Exercise({ id }) {
               })()}
             </Paper>
 
-            <Paper variant="outlined" sx={{ p: 1.5, flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', width: '100%' }}>
+            <Paper
+              variant="outlined"
+              sx={{
+                p: 1.5,
+                flex: 1,
+                minHeight: 0,
+                display: 'flex',
+                flexDirection: 'column',
+                width: '100%',
+                minWidth: 0,
+              }}
+            >
               <Stack direction="row" spacing={1} sx={{ mb: 1 }}>
                 <Button size="small" variant="outlined" onClick={() => navigator.clipboard.writeText(log || '')} disabled={!log}>Copy</Button>
                 <Button size="small" variant="text" onClick={() => setLog('')} disabled={!log}>Clear</Button>
               </Stack>
-              <Box component="pre" sx={{
-                fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, \"Liberation Mono\", \"Courier New\", monospace',
-                whiteSpace: 'pre-wrap',
-                m: 0,
-                fontSize: 13,
-                lineHeight: 1.55,
-                overflow: 'auto',
-                p: 1,
-                bgcolor: (t) => (t.palette.mode === 'dark' ? 'grey.900' : 'grey.50'),
-                borderRadius: 1,
-                flex: 1,
-                width: '100%'
-              }}>
+              <Box
+                component="pre"
+                sx={{
+                  fontFamily:
+                    'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+                  whiteSpace: 'pre-wrap',
+                  m: 0,
+                  fontSize: 13,
+                  lineHeight: 1.55,
+                  overflow: 'auto',
+                  p: 1,
+                  bgcolor: (t) => (t.palette.mode === 'dark' ? 'grey.900' : 'grey.50'),
+                  borderRadius: 1,
+                  flex: 1,
+                  width: '100%',
+                  minWidth: 0,
+                }}
+              >
                 {log || 'Logs will appear here…'}
               </Box>
             </Paper>
@@ -231,9 +374,12 @@ export default function Exercise({ id }) {
         </Grid>
       </Grid>
 
-      
-
-      <Snackbar open={snack.open} autoHideDuration={2500} onClose={() => setSnack(s => ({ ...s, open: false }))} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}>
+      <Snackbar
+        open={snack.open}
+        autoHideDuration={2500}
+        onClose={() => setSnack(s => ({ ...s, open: false }))}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
         <Alert onClose={() => setSnack(s => ({ ...s, open: false }))} severity={snack.severity} sx={{ width: '100%' }}>
           {snack.message}
         </Alert>
@@ -250,7 +396,6 @@ function parseMochaSummary(fullLog) {
   const failures = []
   const lines = text.split(/\r?\n/)
   for (const ln of lines) {
-    // Examples: "  1) Suite name" OR "1) Suite name test name"
     const m = ln.match(/^\s*(\d+)\)\s+(.+)/)
     if (m) failures.push(m[2].trim())
   }
@@ -260,4 +405,3 @@ function parseMochaSummary(fullLog) {
     failures
   }
 }
-
