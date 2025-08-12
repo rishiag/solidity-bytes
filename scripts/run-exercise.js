@@ -186,7 +186,7 @@ async function main() {
   const hhCfg = path.join(workdir, 'hardhat.config.js');
   const hhCfgCjs = path.join(workdir, 'hardhat.config.cjs');
   if (!fs.existsSync(hhCfg) && !fs.existsSync(hhCfgCjs)) {
-    const cfg = 'require("@nomicfoundation/hardhat-toolbox");module.exports={solidity:"0.8.20",networks:{local:{url:process.env.RPC_URL||"http://127.0.0.1:8545"}}};'
+    const cfg = 'require("@nomicfoundation/hardhat-toolbox");module.exports={solidity:"0.8.24"};'
     fs.writeFileSync(hhCfgCjs, cfg);
   }
 

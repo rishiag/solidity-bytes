@@ -8,7 +8,7 @@ import { fileURLToPath } from 'url';
 import session from 'express-session';
 import FileStoreFactory from 'session-file-store';
 import { OAuth2Client } from 'google-auth-library';
-import anvilPool from './anvilPool.js';
+// Removed anvilPool import - using Hardhat only for MVP
 
 const app = express();
 // Optional allowlist via env FRONTEND_ORIGIN (comma-separated). Defaults to * during MVP.
@@ -223,19 +223,16 @@ app.post('/submissions', async (req, res) => {
   try {
     console.log(JSON.stringify({ type: 'job_received', sid, exerciseId: id, mode, userId, deviceId: deviceId || null, ts: Date.now() }));
 
-  const worker = anvilPool.acquire();
   const args = ['scripts/run-exercise.js', '--id', id];
   if (useSolution) args.push('--solution');
   const child = spawn('node', args, {
     cwd: process.cwd(),
     env: {
       ...process.env,
-      RPC_URL: worker ? worker.url : undefined,
       RUN_OVERRIDES: overrides && Array.isArray(overrides) ? JSON.stringify(overrides) : undefined,
     },
   });
-  if (worker) console.log(JSON.stringify({ type: 'worker_acquired', sid, workerId: worker.id, url: worker.url, ts: Date.now() }));
-  console.log(JSON.stringify({ type: 'runner_spawn', sid, args, rpcUrl: worker ? worker.url : null, ts: Date.now() }));
+  console.log(JSON.stringify({ type: 'runner_spawn', sid, args, ts: Date.now() }));
 
   submissions.set(sid, { child, startedAt: Date.now(), exerciseId: id, deviceId: deviceId || null, userId });
 
@@ -244,10 +241,6 @@ app.post('/submissions', async (req, res) => {
   });
 
   child.on('close', async (code) => {
-    if (worker) {
-      await anvilPool.release(worker);
-      console.log(JSON.stringify({ type: 'worker_released', sid, workerId: worker.id, ts: Date.now() }));
-    }
     setTimeout(() => submissions.delete(sid), 5 * 60 * 1000);
   });
 
@@ -364,7 +357,7 @@ app.post('/me/progress/migrate', (req, res) => {
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, async () => {
-  await anvilPool.init();
+  // Removed anvilPool.init() - using Hardhat only for MVP
   console.log(`API listening on :${PORT}`);
 });
 

@@ -34,7 +34,7 @@ export default function Exercise({ id }) {
   useEffect(() => {
     setError(null)
     setMeta(null)
-    fetch(`/api/exercises/${id}`)
+    fetch(`/exercises/${id}`)
       .then(async (r) => {
         if (!r.ok) {
           if (r.status === 404) throw new Error('not_found')
@@ -190,7 +190,7 @@ export default function Exercise({ id }) {
                     try {
                       setSolutionError(null)
                       setSolutionLoading(true)
-                      const r = await fetch(`/api/exercises/${id}/solution`)
+                      const r = await fetch(`/exercises/${id}/solution`)
                       if (!r.ok) {
                         const msg = r.status === 401 ? 'Login required' : r.status === 403 ? 'Locked until you pass' : `Error ${r.status}`
                         throw new Error(msg)
