@@ -21,6 +21,16 @@ export default function Exercise({ id }) {
   const [solutionError, setSolutionError] = useState(null)
   const [snack, setSnack] = useState({ open: false, message: '', severity: 'success' })
 
+  const resetToStarter = () => {
+    try {
+      if (!meta?.starter?.files) return
+      const init = {}
+      for (const f of meta.starter.files) init[f.path] = f.content
+      setEdited(init)
+      localStorage.removeItem(`sb:code:${id}`)
+    } catch {}
+  }
+
   useEffect(() => {
     setError(null)
     setMeta(null)
@@ -327,11 +337,15 @@ export default function Exercise({ id }) {
                               {exitCode !== null && (
                                 <Chip color={exitCode === 0 ? 'success' : 'error'} label={exitCode === 0 ? 'Passed' : 'Failed'} size="small" />
                               )}
+                              {/** Temporarily hide per-run pass/fail counts */}
+                              {/**
                               {summary && (
                                 <Typography variant="caption" color="text.secondary">
                                   {summary.passing} passed{typeof summary.failing === 'number' ? `, ${summary.failing} failed` : ''}
                                 </Typography>
                               )}
+                              */}
+                              <Button size="small" variant="outlined" onClick={resetToStarter} disabled={running}>Reset to Start</Button>
                               <Button size="small" variant="contained" onClick={() => run('starter')} disabled={running}>Run Code</Button>
                             </Stack>
                           )}
