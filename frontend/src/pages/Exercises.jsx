@@ -3,6 +3,7 @@ import { Box, Typography, Stack, Collapse, IconButton, List, ListItemButton, Lis
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import categories from '../data/categories'
+const API_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 export default function Exercises() {
   const [open, setOpen] = useState({})
@@ -15,7 +16,7 @@ export default function Exercises() {
   const toggle = (id) => setOpen((prev) => ({ ...prev, [id]: !prev[id] }))
 
   useEffect(() => {
-    fetch('/exercises')
+    fetch(`${API_URL}/exercises`)
       .then(r => r.json())
       .then(setItems)
       .catch(e => setError(String(e)))

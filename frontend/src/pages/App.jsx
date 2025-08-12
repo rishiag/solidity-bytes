@@ -5,6 +5,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import Exercises from './Exercises.jsx'
 import Exercise from './Exercise.jsx'
 import NotFound from './NotFound.jsx'
+const API_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 export default function App() {
   const [route, setRoute] = useState(window.location.hash.replace('#', '') || '/')
@@ -16,7 +17,7 @@ export default function App() {
   }, [])
 
   useEffect(() => {
-    fetch('/api/auth/me')
+    fetch('${API_URL}/api/auth/me')
       .then(r => r.json())
       .then(d => setUser(d.user || null))
       .catch(() => {})

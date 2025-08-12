@@ -5,6 +5,7 @@ import {
 } from '@mui/material'
 import Editor from '@monaco-editor/react'
 import NotFound from './NotFound.jsx'
+const API_URL = import.meta.env.VITE_API_BASE_URL || '';
 
 export default function Exercise({ id }) {
   const [meta, setMeta] = useState(null)
@@ -34,7 +35,7 @@ export default function Exercise({ id }) {
   useEffect(() => {
     setError(null)
     setMeta(null)
-    fetch(`/exercises/${id}`)
+    fetch(`${API_URL}/exercises/${id}`)
       .then(async (r) => {
         if (!r.ok) {
           if (r.status === 404) throw new Error('not_found')
@@ -63,7 +64,7 @@ export default function Exercise({ id }) {
         }
       }
       const deviceId = localStorage.getItem('sb:device') || 'dev-local'
-      const r = await fetch('/api/submissions', {
+      const r = await fetch(`${API_URL}/submissions`, {
         method: 'POST', headers: { 'content-type': 'application/json' },
         body: JSON.stringify({ id, mode, overrides: overrides.length ? overrides : undefined, deviceId })
       })
@@ -85,7 +86,7 @@ export default function Exercise({ id }) {
         } catch {}
         setSnack({ open: true, message: d.code === 0 ? 'All tests passed' : 'Tests failed', severity: d.code === 0 ? 'success' : 'error' })
         try {
-          const me = await fetch('/api/auth/me').then(r=>r.json()).catch(()=>({}))
+          const me = await fetch(`${API_URL}/auth/me`).then(r=>r.json()).catch(()=>({}))
           if (!me.user) {
             const key = 'sb:device'
             const dev = localStorage.getItem(key) || deviceId
@@ -190,7 +191,7 @@ export default function Exercise({ id }) {
                     try {
                       setSolutionError(null)
                       setSolutionLoading(true)
-                      const r = await fetch(`/exercises/${id}/solution`)
+                      const r = await fetch(`${API_URL}/exercises/${id}/solution`)
                       if (!r.ok) {
                         const msg = r.status === 401 ? 'Login required' : r.status === 403 ? 'Locked until you pass' : `Error ${r.status}`
                         throw new Error(msg)
