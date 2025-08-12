@@ -6,7 +6,9 @@ import { spawn } from 'child_process';
 import YAML from 'yaml';
 import { fileURLToPath } from 'url';
 import session from 'express-session';
+import FileStoreFactory from 'session-file-store';
 import { OAuth2Client } from 'google-auth-library';
+import anvilPool from './anvilPool.js';
 
 const app = express();
 // Optional allowlist via env FRONTEND_ORIGIN (comma-separated). Defaults to * during MVP.
@@ -24,6 +26,7 @@ app.use(express.json());
 const isHttps = (process.env.PUBLIC_BASE_URL || '').startsWith('https://');
 app.use(
   session({
+    store: new (FileStoreFactory(session))({ path: path.join(process.cwd(), '.data', 'sessions'), retries: 0 }),
     secret: process.env.SESSION_SECRET || 'dev-insecure-secret',
     resave: false,
     saveUninitialized: false,
@@ -198,12 +201,8 @@ app.get('/exercises/:id/solution', requireAuth, (req, res) => {
   const doc = findExerciseById(req.params.id);
   if (!doc) return res.status(404).json({ error: 'not_found' });
   const visibility = doc.visibility || 'after-pass';
+  // If authors explicitly set to never, still forbid; otherwise allow for logged-in users
   if (visibility === 'never') return res.status(403).json({ error: 'forbidden' });
-  if (visibility === 'after-pass') {
-    const db = readProgress();
-    const rec = db[`u:${req.session.user.id}`] || { solved: {} };
-    if (!rec.solved[doc.id]) return res.status(403).json({ error: 'locked_until_pass' });
-  }
   const files = doc.solution?.files || [];
   res.json({ id: doc.id, files });
 });
@@ -212,7 +211,7 @@ function makeSid() {
   return 'sub_' + Math.random().toString(36).slice(2, 10);
 }
 
-app.post('/submissions', (req, res) => {
+app.post('/submissions', async (req, res) => {
   const { id, mode, overrides, deviceId } = req.body || {};
   if (!id) return res.status(400).json({ error: 'missing_id' });
   const doc = findExerciseById(id);
@@ -220,25 +219,43 @@ app.post('/submissions', (req, res) => {
 
   const useSolution = mode === 'solution';
   const sid = makeSid();
+  const userId = req.session.user?.id || null;
+  try {
+    console.log(JSON.stringify({ type: 'job_received', sid, exerciseId: id, mode, userId, deviceId: deviceId || null, ts: Date.now() }));
 
+  const worker = anvilPool.acquire();
   const args = ['scripts/run-exercise.js', '--id', id];
   if (useSolution) args.push('--solution');
   const child = spawn('node', args, {
     cwd: process.cwd(),
     env: {
       ...process.env,
+      RPC_URL: worker ? worker.url : undefined,
       RUN_OVERRIDES: overrides && Array.isArray(overrides) ? JSON.stringify(overrides) : undefined,
     },
   });
+  if (worker) console.log(JSON.stringify({ type: 'worker_acquired', sid, workerId: worker.id, url: worker.url, ts: Date.now() }));
+  console.log(JSON.stringify({ type: 'runner_spawn', sid, args, rpcUrl: worker ? worker.url : null, ts: Date.now() }));
 
-  const userId = req.session.user?.id || null;
   submissions.set(sid, { child, startedAt: Date.now(), exerciseId: id, deviceId: deviceId || null, userId });
 
-  child.on('close', () => {
+  child.on('error', (err) => {
+    console.log(JSON.stringify({ type: 'runner_error', sid, message: String(err?.message || err), ts: Date.now() }));
+  });
+
+  child.on('close', async (code) => {
+    if (worker) {
+      await anvilPool.release(worker);
+      console.log(JSON.stringify({ type: 'worker_released', sid, workerId: worker.id, ts: Date.now() }));
+    }
     setTimeout(() => submissions.delete(sid), 5 * 60 * 1000);
   });
 
   res.json({ submissionId: sid });
+  } catch (e) {
+    console.log(JSON.stringify({ type: 'job_error', sid, exerciseId: id, message: String(e?.message || e), ts: Date.now() }));
+    res.status(500).json({ error: 'spawn_failed' });
+  }
 });
 
 app.get('/submissions/:sid/stream', (req, res) => {
@@ -259,6 +276,7 @@ app.get('/submissions/:sid/stream', (req, res) => {
 
   let totalBytes = 0;
   const MAX_BYTES = 200 * 1024; // 200KB per run
+  const startedAt = Date.now();
   const onChunk = (stream, buf) => {
     if (!buf) return;
     const s = buf.toString();
@@ -300,6 +318,9 @@ app.get('/submissions/:sid/stream', (req, res) => {
       writeProgress(db);
     }
     send('done', { code });
+    const ms = Date.now() - startedAt;
+    const truncated = totalBytes > MAX_BYTES;
+    console.log(JSON.stringify({ type: 'stream_done', sid: req.params.sid, code, ms, bytes: totalBytes, truncated, ts: Date.now() }));
     res.end();
   });
 
@@ -342,5 +363,8 @@ app.post('/me/progress/migrate', (req, res) => {
 });
 
 const PORT = process.env.PORT || 3001;
-app.listen(PORT, () => console.log(`API listening on :${PORT}`));
+app.listen(PORT, async () => {
+  await anvilPool.init();
+  console.log(`API listening on :${PORT}`);
+});
 

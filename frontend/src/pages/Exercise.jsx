@@ -154,14 +154,26 @@ export default function Exercise({ id }) {
               [{meta.difficulty}] {meta.tags?.join(', ')}
             </Typography>
             */}
-            <Typography sx={{ whiteSpace: 'pre-wrap', mt: 1 }}>{meta.description}</Typography>
+            <Typography sx={{ whiteSpace: 'pre-wrap', mt: 1 }}>{String(meta.description || '').replace(/`/g, '')}</Typography>
             <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
-              <Button size="small" variant="outlined" onClick={() => setShowHints(v => !v)}>
+              <Button
+                size="small"
+                variant="contained"
+                onClick={() => setShowHints(v => !v)}
+                sx={showHints ? {
+                  bgcolor: 'background.paper',
+                  color: 'text.primary',
+                  boxShadow: 'none',
+                  border: 1,
+                  borderColor: 'divider',
+                  '&:hover': { bgcolor: 'background.paper', boxShadow: 'none' }
+                } : {}}
+              >
                 {showHints ? 'Hide Hints' : 'Show Hints'}
               </Button>
               <Button
                 size="small"
-                variant="outlined"
+                variant="contained"
                 onClick={async () => {
                   setShowSolution((v) => !v)
                   if (!showSolution && !solution && !solutionLoading) {
@@ -182,6 +194,14 @@ export default function Exercise({ id }) {
                     }
                   }
                 }}
+                sx={showSolution ? {
+                  bgcolor: 'background.paper',
+                  color: 'text.primary',
+                  boxShadow: 'none',
+                  border: 1,
+                  borderColor: 'divider',
+                  '&:hover': { bgcolor: 'background.paper', boxShadow: 'none' }
+                } : {}}
               >
                 {showSolution ? 'Hide Solution' : 'View Solution'}
               </Button>
