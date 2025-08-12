@@ -4,4 +4,4 @@ node_modules
 npm-debug.log*
 .md_files/
 .data/
-dist/
+frontend/dist/
