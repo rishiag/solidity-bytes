@@ -36,16 +36,33 @@ export default function App() {
             }}>Exercises</MLink>
             {(() => {
               const [anchorEl, setAnchorEl] = React.useState(null)
-              const open = Boolean(anchorEl)
-              const handleOpen = (e) => setAnchorEl(e.currentTarget)
-              const handleClose = () => setAnchorEl(null)
+              const [menuOpen, setMenuOpen] = React.useState(false)
+              const open = Boolean(anchorEl) && menuOpen
+              const handleOpen = (e) => {
+                setAnchorEl(e.currentTarget)
+                setMenuOpen(true)
+              }
+              const handleClose = () => {
+                setMenuOpen(false)
+                setTimeout(() => setAnchorEl(null), 100)
+              }
               return (
                 <>
-                  <Button size="small" onClick={handleOpen} endIcon={<ExpandMoreIcon fontSize="small" />} sx={{
+                  <Button size="small" onMouseEnter={handleOpen} endIcon={<ExpandMoreIcon fontSize="small" />} sx={{
                     fontSize: 14, textTransform: 'none', color: 'text.primary',
-                    '&:hover': { backgroundColor: 'action.hover' }
+                    '&:hover': { color: 'primary.main', backgroundColor: 'transparent' }
                   }}>Get Help</Button>
-                  <Menu anchorEl={anchorEl} open={open} onClose={handleClose} keepMounted>
+                  <Menu 
+                    anchorEl={anchorEl} 
+                    open={open} 
+                    onClose={handleClose} 
+                    keepMounted
+                    onMouseEnter={() => setMenuOpen(true)}
+                    onMouseLeave={handleClose}
+                    MenuListProps={{
+                      onMouseLeave: handleClose
+                    }}
+                  >
                     <MenuItem component="a" href="https://soliditylang.org/" target="_blank" rel="noreferrer" onClick={handleClose}>
                       Solidity Docs
                     </MenuItem>
