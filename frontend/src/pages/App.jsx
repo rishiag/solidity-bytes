@@ -17,7 +17,7 @@ export default function App() {
   }, [])
 
   useEffect(() => {
-    fetch('${API_URL}/api/auth/me')
+    fetch(`${API_URL}/api/auth/me`, { credentials: 'include' })
       .then(r => r.json())
       .then(d => setUser(d.user || null))
       .catch(() => {})
@@ -81,12 +81,12 @@ export default function App() {
                     {user.name || user.email}
                   </Typography>
                 </Stack>
-                <form method="POST" action="/api/auth/logout" style={{ display: 'inline' }}>
+                <form method="POST" action={`${API_URL}/api/auth/logout`} style={{ display: 'inline' }}>
                   <Button size="small" variant="outlined" type="submit">Logout</Button>
                 </form>
               </>
             ) : (
-              <Button size="small" variant="contained" href="/api/auth/google/start">Login with Google</Button>
+              <Button size="small" variant="contained" href={`${API_URL}/api/auth/google/start`}>Login with Google</Button>
             )}
           </Box>
         </MContainer>

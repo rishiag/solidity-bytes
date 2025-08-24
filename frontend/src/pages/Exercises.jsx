@@ -16,7 +16,7 @@ export default function Exercises() {
   const toggle = (id) => setOpen((prev) => ({ ...prev, [id]: !prev[id] }))
 
   useEffect(() => {
-    fetch(`${API_URL}/exercises`)
+    fetch(`${API_URL}/api/exercises`)
       .then(r => r.json())
       .then(setItems)
       .catch(e => setError(String(e)))

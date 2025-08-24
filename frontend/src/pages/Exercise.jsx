@@ -35,7 +35,7 @@ export default function Exercise({ id }) {
   useEffect(() => {
     setError(null)
     setMeta(null)
-    fetch(`${API_URL}/exercises/${id}`)
+    fetch(`${API_URL}/api/exercises/${id}`)
       .then(async (r) => {
         if (!r.ok) {
           if (r.status === 404) throw new Error('not_found')
@@ -64,12 +64,14 @@ export default function Exercise({ id }) {
         }
       }
       const deviceId = localStorage.getItem('sb:device') || 'dev-local'
-      const r = await fetch(`${API_URL}/submissions`, {
-        method: 'POST', headers: { 'content-type': 'application/json' },
+      const r = await fetch(`${API_URL}/api/submissions`, {
+        method: 'POST', 
+        headers: { 'content-type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ id, mode, overrides: overrides.length ? overrides : undefined, deviceId })
       })
       const j = await r.json()
-      const es = new EventSource(`/api/submissions/${j.submissionId}/stream`)
+      const es = new EventSource(`${API_URL}/api/submissions/${j.submissionId}/stream`)
       es.addEventListener('log', (ev) => {
         const d = JSON.parse(ev.data)
         setLog(x => x + d.chunk)
@@ -86,7 +88,7 @@ export default function Exercise({ id }) {
         } catch {}
         setSnack({ open: true, message: d.code === 0 ? 'All tests passed' : 'Tests failed', severity: d.code === 0 ? 'success' : 'error' })
         try {
-          const me = await fetch(`${API_URL}/auth/me`).then(r=>r.json()).catch(()=>({}))
+          const me = await fetch(`${API_URL}/api/auth/me`, { credentials: 'include' }).then(r=>r.json()).catch(()=>({}))
           if (!me.user) {
             const key = 'sb:device'
             const dev = localStorage.getItem(key) || deviceId
@@ -191,7 +193,7 @@ export default function Exercise({ id }) {
                     try {
                       setSolutionError(null)
                       setSolutionLoading(true)
-                      const r = await fetch(`${API_URL}/exercises/${id}/solution`)
+                      const r = await fetch(`${API_URL}/api/exercises/${id}/solution`, { credentials: 'include' })
                       if (!r.ok) {
                         const msg = r.status === 401 ? 'Login required' : r.status === 403 ? 'Locked until you pass' : `Error ${r.status}`
                         throw new Error(msg)
