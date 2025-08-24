@@ -18,11 +18,12 @@ app.use(cors({
     if (allowlist.length === 0) return cb(null, true);
     if (!origin) return cb(null, false);
     cb(null, allowlist.includes(origin));
-  }
+  },
+  credentials: true
 }));
 app.use(express.json());
 
-// Session (for auth). On localhost we use non-secure cookies.
+// Session (for auth). Configure for dev proxy environment
 const isHttps = (process.env.PUBLIC_BASE_URL || '').startsWith('https://');
 app.use(
   session({
@@ -32,7 +33,7 @@ app.use(
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      sameSite: isHttps ? 'none' : 'lax',
+      sameSite: 'lax',
       secure: isHttps,
       maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
     },
@@ -98,7 +99,7 @@ function getOAuthClient() {
   return new OAuth2Client({ clientId, clientSecret, redirectUri });
 }
 
-app.get('/auth/google/start', (req, res) => {
+app.get('/api/auth/google/start', (req, res) => {
   const client = getOAuthClient();
   if (!client) return res.status(500).json({ error: 'oauth_not_configured' });
   const url = client.generateAuthUrl({
@@ -109,7 +110,7 @@ app.get('/auth/google/start', (req, res) => {
   res.redirect(url);
 });
 
-app.get('/auth/google/callback', async (req, res) => {
+app.get('/api/auth/google/callback', async (req, res) => {
   try {
     const client = getOAuthClient();
     if (!client) return res.status(500).send('OAuth not configured');
@@ -131,18 +132,18 @@ app.get('/auth/google/callback', async (req, res) => {
   }
 });
 
-app.get('/auth/me', (req, res) => {
+app.get('/api/auth/me', (req, res) => {
   res.json({ user: req.session.user || null });
 });
 
-app.post('/auth/logout', (req, res) => {
+app.post('/api/auth/logout', (req, res) => {
   req.session.destroy(() => res.json({ ok: true }));
 });
 
-app.get('/health', (_req, res) => res.json({ ok: true }));
+app.get('/api/health', (_req, res) => res.json({ ok: true }));
 
 // Basic sitemap.xml (list exercises and core pages)
-app.get('/sitemap.xml', (_req, res) => {
+app.get('/api/sitemap.xml', (_req, res) => {
   const base = process.env.PUBLIC_BASE_URL || 'http://localhost:3000';
   const dir = path.join(process.cwd(), 'exercises');
   const urls = [
@@ -162,7 +163,7 @@ app.get('/sitemap.xml', (_req, res) => {
   res.send(xml);
 });
 
-app.get('/exercises', (_req, res) => {
+app.get('/api/exercises', (_req, res) => {
   const dir = path.join(process.cwd(), 'exercises');
   const items = listYamlFilesRecursively(dir).map((p) => {
     const d = readExerciseDoc(p);
@@ -171,7 +172,7 @@ app.get('/exercises', (_req, res) => {
   res.json(items);
 });
 
-app.get('/exercises/:id', (req, res) => {
+app.get('/api/exercises/:id', (req, res) => {
   const doc = findExerciseById(req.params.id);
   if (!doc) return res.status(404).json({ error: 'not_found' });
   const safe = {
@@ -197,7 +198,7 @@ function requireAuth(req, res, next) {
   next();
 }
 
-app.get('/exercises/:id/solution', requireAuth, (req, res) => {
+app.get('/api/exercises/:id/solution', requireAuth, (req, res) => {
   const doc = findExerciseById(req.params.id);
   if (!doc) return res.status(404).json({ error: 'not_found' });
   const visibility = doc.visibility || 'after-pass';
@@ -211,7 +212,7 @@ function makeSid() {
   return 'sub_' + Math.random().toString(36).slice(2, 10);
 }
 
-app.post('/submissions', async (req, res) => {
+app.post('/api/submissions', async (req, res) => {
   const { id, mode, overrides, deviceId } = req.body || {};
   if (!id) return res.status(400).json({ error: 'missing_id' });
   const doc = findExerciseById(id);
@@ -251,7 +252,7 @@ app.post('/submissions', async (req, res) => {
   }
 });
 
-app.get('/submissions/:sid/stream', (req, res) => {
+app.get('/api/submissions/:sid/stream', (req, res) => {
   const entry = submissions.get(req.params.sid);
   if (!entry) return res.status(404).end();
 
@@ -324,7 +325,7 @@ app.get('/submissions/:sid/stream', (req, res) => {
 });
 
 // Progress by deviceId (legacy for anonymous users)
-app.get('/progress', (req, res) => {
+app.get('/api/progress', (req, res) => {
   const deviceId = req.query.deviceId;
   const db = readProgress();
   if (!deviceId) return res.json({ solved: {} });
@@ -333,7 +334,7 @@ app.get('/progress', (req, res) => {
 });
 
 // Progress for logged-in user
-app.get('/me/progress', (req, res) => {
+app.get('/api/me/progress', (req, res) => {
   if (!req.session.user) return res.status(401).json({ error: 'unauthorized' });
   const db = readProgress();
   const rec = db[`u:${req.session.user.id}`] || { solved: {} };
@@ -341,7 +342,7 @@ app.get('/me/progress', (req, res) => {
 });
 
 // Merge device progress into user
-app.post('/me/progress/migrate', (req, res) => {
+app.post('/api/me/progress/migrate', (req, res) => {
   if (!req.session.user) return res.status(401).json({ error: 'unauthorized' });
   const deviceId = req.body?.deviceId;
   if (!deviceId) return res.status(400).json({ error: 'missing_deviceId' });
