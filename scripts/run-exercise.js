@@ -135,27 +135,45 @@ async function npmInstallIfNeeded(workdir, pkgObj, verbose) {
   }
 }
 
-async function runTests(workdir, verbose) {
+async function runTests(workdir, verbose, anvilPort = 8545) {
   return new Promise((resolve) => {
-    const cmd = process.platform === 'win32' ? 'npx.cmd' : 'npx';
-    const p = spawn(cmd, ['hardhat', 'test'], {
-      cwd: workdir,
-      stdio: verbose ? 'inherit' : 'pipe',
-      env: {
-        ...process.env,
-        // Suppress Hardhat's node version warning in the runner context
-        HARDHAT_DISABLE_NODEJS_WARNING: '1',
+    // Start Anvil node with specified port
+    const anvil = spawn('anvil', [
+      '--port', anvilPort.toString(),
+      '--silent' // Reduce Anvil output noise
+    ], {
+      env: { ...process.env, PATH: `${process.env.HOME}/.foundry/bin:${process.env.PATH}` }
+    });
+
+    // Give Anvil time to start
+    setTimeout(() => {
+      const cmd = process.platform === 'win32' ? 'npx.cmd' : 'npx';
+      const p = spawn(cmd, ['hardhat', 'test', '--network', 'localhost'], {
+        cwd: workdir,
+        stdio: verbose ? 'inherit' : 'pipe',
+        env: {
+          ...process.env,
+          // Set the localhost network to use our Anvil instance
+          HARDHAT_NETWORK: 'localhost',
+          HARDHAT_DISABLE_NODEJS_WARNING: '1',
+          // Ensure Foundry is in PATH
+          PATH: `${process.env.HOME}/.foundry/bin:${process.env.PATH}`
+        }
+      });
+
+      let out = '';
+      if (!verbose) {
+        p.stdout.on('data', (d) => (out += d.toString()));
+        p.stderr.on('data', (d) => (out += d.toString()));
       }
-    });
-    let out = '';
-    if (!verbose) {
-      p.stdout.on('data', (d) => (out += d.toString()));
-      p.stderr.on('data', (d) => (out += d.toString()));
-    }
-    p.on('close', (code) => {
-      if (!verbose) process.stdout.write(out);
-      resolve(code);
-    });
+
+      p.on('close', (code) => {
+        // Clean up Anvil process
+        try { anvil.kill('SIGTERM'); } catch (e) {}
+        if (!verbose) process.stdout.write(out);
+        resolve(code);
+      });
+    }, 1000); // Wait 1 second for Anvil to start
   });
 }
 
@@ -183,16 +201,25 @@ async function main() {
     }
   }
 
+  // Generate a random port for Anvil to avoid conflicts
+  const anvilPort = 8545 + Math.floor(Math.random() * 1000);
+
+  // Always create/update hardhat config to include localhost network with our Anvil port
   const hhCfg = path.join(workdir, 'hardhat.config.js');
-  const hhCfgCjs = path.join(workdir, 'hardhat.config.cjs');
-  if (!fs.existsSync(hhCfg) && !fs.existsSync(hhCfgCjs)) {
-    const cfg = 'require("@nomicfoundation/hardhat-toolbox");module.exports={solidity:"0.8.24"};'
-    fs.writeFileSync(hhCfgCjs, cfg);
+  const cfg = `require("@nomicfoundation/hardhat-toolbox");
+module.exports = {
+  solidity: "0.8.24",
+  networks: {
+    localhost: {
+      url: "http://127.0.0.1:${anvilPort}"
+    }
   }
+};`;
+  fs.writeFileSync(hhCfg, cfg);
 
   const pkgObj = ensurePkg(workdir);
   await npmInstallIfNeeded(workdir, pkgObj, args.verbose);
-  const code = await runTests(workdir, args.verbose);
+  const code = await runTests(workdir, args.verbose, anvilPort);
   process.exit(code);
 }
 
