@@ -212,35 +212,16 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Hardhat Team** - For the excellent Ethereum development framework
 - **Monaco Editor** - For the powerful web-based code editor
 - **Material-UI** - For the beautiful component library
-- **Ethereum Foundation** - For supporting Solidity development
 
 ## 📞 Contact & Support
 
-- **GitHub Issues**: [Report bugs or request features](https://github.com/yourusername/solidity-bytes/issues)
-- **Discussions**: [Join the community](https://github.com/yourusername/solidity-bytes/discussions)
-- **Email**: your-email@example.com
+- **GitHub Issues**: [Report bugs or request features](https://github.com/rishiag/solidity-bytes/issues)
+- **Discussions**: [Join the community](https://github.com/rishiag/solidity-bytes/discussions)
+- **Email**: rishiag.iitd at gmail.com
 
 ## 🌟 Roadmap
 
-### **Phase 1: Core Platform (Current)**
-- ✅ Interactive code editor
-- ✅ Real-time compilation and testing
-- ✅ Basic exercise framework
-- ✅ Progress tracking
-
-### **Phase 2: Enhanced Learning (In Progress)**
-- 🔄 Advanced exercise types
-- 🔄 Interactive tutorials
-- 🔄 Code analysis and suggestions
-- 🔄 Community features
-
-### **Phase 3: Advanced Features (Planned)**
-- 📋 Multi-language support
-- 📋 Mobile optimization
-- 📋 Advanced analytics
-- 📋 Certification system
-
----
+To be Updated
 
 **Made with ❤️ for the Ethereum community**
 
