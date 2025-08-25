@@ -198,11 +198,11 @@ function requireAuth(req, res, next) {
   next();
 }
 
-app.get('/api/exercises/:id/solution', requireAuth, (req, res) => {
+app.get('/api/exercises/:id/solution', (req, res) => {
   const doc = findExerciseById(req.params.id);
   if (!doc) return res.status(404).json({ error: 'not_found' });
   const visibility = doc.visibility || 'after-pass';
-  // If authors explicitly set to never, still forbid; otherwise allow for logged-in users
+  // If authors explicitly set to never, still forbid; otherwise allow access
   if (visibility === 'never') return res.status(403).json({ error: 'forbidden' });
   const files = doc.solution?.files || [];
   res.json({ id: doc.id, files });
