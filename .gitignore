@@ -7,3 +7,4 @@ npm-debug.log*
 frontend/dist/
 frontend/.env
 frontend/.env.production
+logs/
